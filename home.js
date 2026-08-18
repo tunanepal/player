@@ -8,7 +8,7 @@ import { GAMES } from './config.js';
 import { SCHEMA } from './customs.js';
 import { paintTournaments } from './tourney.js';
 import {
-  $, esc, money, when, mmss, onTick, toast, openSheet, closeSheet,
+  $, $$, esc, money, when, mmss, onTick, toast, openSheet, closeSheet,
   busy, showError, clearError, emptyState, skeletons, avatarHTML
 } from './ui.js';
 import { refreshMe } from './session.js';
@@ -153,7 +153,7 @@ function setMode(next) {
     b.setAttribute('aria-pressed', String(b.dataset.m === mode)));
   $('#paneRooms').hidden = mode !== 'rooms';
   $('#paneTourn').hidden = mode !== 'tourn';
-  showHome();
+  showHome().catch((e) => toast(e.message, 'bad'));
 }
 
 function syncGamePick() {

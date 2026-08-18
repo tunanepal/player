@@ -3,7 +3,7 @@
    Supabase calls always go to the network — stale points would be worse than
    an error message. */
 
-const CACHE = 'tuna-v11';
+const CACHE = 'tuna-v12';
 const SHELL = [
   './', './index.html', './manifest.json',
   './tokens.css', './base.css', './screens.css',
