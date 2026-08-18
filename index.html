@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en" data-theme="cream">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tunanepal — Play. Stake. Win.</title>
+<meta name="description" content="PUBG Mobile and Free Fire custom matches in Nepal. Post a room, take a challenge, and get paid when you win.">
+<meta name="theme-color" content="#F6F1E4">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Khand:wght@500;600;700&family=Mukta:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="./css/tokens.css">
+<link rel="stylesheet" href="./css/base.css">
+<link rel="stylesheet" href="./css/screens.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ sign in ══ -->
+<section id="gate" hidden>
+  <div class="gate__art" aria-hidden="true">
+    <svg viewBox="0 0 480 400" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <linearGradient id="dawn" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"   stop-color="#FBE7E9"/>
+          <stop offset=".55" stop-color="#F6F1E4"/>
+          <stop offset="1"   stop-color="#F6F1E4"/>
+        </linearGradient>
+      </defs>
+      <rect width="480" height="400" fill="url(#dawn)"/>
+      <circle cx="352" cy="96" r="30" fill="#D51A34" opacity=".14"/>
+      <circle cx="352" cy="96" r="13" fill="#E8940C" opacity=".55"/>
+      <!-- Himalayan ridgeline: the horizon every Nepali player wakes up to -->
+      <path d="M0 292 L58 214 L100 254 L164 166 L212 232 L262 150 L318 240 L370 194 L430 262 L480 224 L480 400 L0 400 Z"
+            fill="#2C3A72" opacity=".13"/>
+      <path d="M164 166 L182 190 L146 190 Z M262 150 L282 178 L242 178 Z" fill="#FFFDF6" opacity=".9"/>
+      <path d="M0 332 L74 280 L146 326 L226 266 L302 322 L386 274 L480 326 L480 400 L0 400 Z"
+            fill="#D51A34" opacity=".10"/>
+    </svg>
+  </div>
+
+  <div class="gate__body">
+    <h1 class="wordmark">TUNA<em>NEPAL</em></h1>
+    <p>Post a room, take a challenge, get paid when you win.</p>
+
+    <div class="alert alert--bad" id="gateErr" hidden></div>
+
+    <form id="loginForm" novalidate>
+      <label class="field">
+        <span class="label">Mobile number</span>
+        <input id="inPhone" class="mono" type="tel" inputmode="numeric"
+               autocomplete="tel" placeholder="98XXXXXXXX" maxlength="14" required>
+      </label>
+
+      <label class="field">
+        <span class="label">Full name</span>
+        <input id="inName" type="text" autocomplete="name" placeholder="Your name" maxlength="40" required>
+      </label>
+
+      <label class="field" id="gatePassword" hidden>
+        <span class="label">Password</span>
+        <input id="inPassword" type="password" autocomplete="current-password" placeholder="Your password">
+        <span class="hint">You set this in Settings. Forgot it? Message support from any signed-in device.</span>
+      </label>
+
+      <button class="btn" type="submit" id="loginBtn">Enter</button>
+    </form>
+
+    <p class="xs muted" style="margin-top:12px">
+      Your number is your player ID. One number holds one account — the name locks to it after the first sign-in.
+    </p>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════════════════ app ══ -->
+<div id="app" hidden>
+
+  <header class="topbar">
+    <span class="avatar" id="barAvatar">T</span>
+    <div class="topbar__id">
+      <b id="barName" class="truncate">Player</b>
+      <small id="barPhone" class="mono">—</small>
+    </div>
+    <button class="bell" id="bellBtn" aria-label="Notifications">
+      <svg viewBox="0 0 24 24"><path d="M18 15v-4a6 6 0 1 0-12 0v4l-1.6 2.4h15.2z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+      <span class="dot" id="bellDot" hidden>0</span>
+    </button>
+    <div class="purse">
+      <small>Points</small>
+      <b id="barPoints">Rs 0</b>
+    </div>
+  </header>
+
+  <main>
+    <!-- ───────────────────────────────────────────────────────── HOME ── -->
+    <section class="screen" id="screen-home" data-on>
+      <div class="adstrip" id="adstrip" hidden></div>
+
+      <div class="section-head" style="margin-top:20px">
+        <h1>Live rooms</h1>
+        <span class="eyebrow">10 min each</span>
+      </div>
+      <p class="small muted">Pick a game to see the rooms waiting for an opponent.</p>
+
+      <div class="gamepick" id="gamepick">
+        <button data-game="pubg" aria-pressed="true">
+          <span class="g-mark" aria-hidden="true"></span>
+          <span class="g-name">PUBG</span>
+          <span class="g-count">—</span>
+        </button>
+        <button data-game="freefire" aria-pressed="false">
+          <span class="g-mark" aria-hidden="true"></span>
+          <span class="g-name">Free Fire</span>
+          <span class="g-count">—</span>
+        </button>
+      </div>
+
+      <div id="roomList" style="margin-top:16px"></div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────────────── LOAD ── -->
+    <section class="screen" id="screen-load">
+      <div class="section-head"><h1>Load</h1></div>
+      <div class="empty"><div class="display">Coming in the next section</div>
+        <p>Deposit, withdraw, and the PUBG UC store.</p></div>
+    </section>
+
+    <!-- ────────────────────────────────────────────────────── CUSTOMS ── -->
+    <section class="screen" id="screen-customs">
+      <div class="section-head"><h1>Customs</h1></div>
+      <div class="empty"><div class="display">Coming in the next section</div>
+        <p>Post a PUBG or Free Fire room with your own rules.</p></div>
+    </section>
+
+    <!-- ──────────────────────────────────────────────────── MY GAMES ── -->
+    <section class="screen" id="screen-games">
+      <div class="section-head"><h1>My games</h1></div>
+      <div class="empty"><div class="display">Coming in the next section</div>
+        <p>Your matches, stakes, wins, and win claims.</p></div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────────── SETTINGS ── -->
+    <section class="screen" id="screen-settings">
+      <div class="section-head"><h1>Settings</h1></div>
+      <div class="empty"><div class="display">Coming in the next section</div>
+        <p>Profile, leaderboard, history, theme, support, feedback.</p></div>
+    </section>
+  </main>
+
+  <nav class="tabbar" id="tabbar" aria-label="Main">
+    <button data-screen="home" aria-current="page">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3.5l9 7v10.5H3z"/><path d="M9.5 21V14h5v7"/></svg>Home</button>
+    <button data-screen="load" aria-current="false">
+      <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M16.5 15h1.8"/></svg>Load</button>
+    <button data-screen="customs" aria-current="false">
+      <svg viewBox="0 0 24 24"><path d="M12 4.5v15M4.5 12h15"/><circle cx="12" cy="12" r="9"/></svg>Customs</button>
+    <button data-screen="games" aria-current="false">
+      <svg viewBox="0 0 24 24"><path d="M7 8.5h10a4 4 0 0 1 0 8H7a4 4 0 0 1 0-8Z"/><path d="M9.5 11v3M8 12.5h3M15 12h.01M16.8 13.6h.01"/></svg>My games</button>
+    <button data-screen="settings" aria-current="false">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.2v2.2M12 18.6v2.2M20.8 12h-2.2M5.4 12H3.2M18.2 5.8l-1.6 1.6M7.4 16.6l-1.6 1.6M18.2 18.2l-1.6-1.6M7.4 7.4 5.8 5.8"/></svg>Settings</button>
+  </nav>
+</div>
+
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>

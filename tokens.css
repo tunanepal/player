@@ -1,0 +1,87 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TUNANEPAL · design tokens
+   Palette pulled from the Nepali flag: crimson field, indigo border, and the
+   marigold of a Tihar garland, laid on unbleached paper cream.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* surfaces */
+  --paper:      #F6F1E4;   /* app background — unbleached paper */
+  --card:       #FFFDF6;   /* raised card */
+  --card-sunk:  #EFE8D6;   /* inset / track */
+  --line:       #DED5BF;   /* hairline */
+  --line-soft:  #E9E1CE;
+
+  /* ink */
+  --ink:        #1C1813;   /* headings, primary text */
+  --ink-2:      #554C3D;   /* body */
+  --ink-3:      #8B8069;   /* captions, muted */
+
+  /* accents */
+  --crimson:    #D51A34;   /* flag crimson — primary action */
+  --crimson-dk: #A31128;
+  --crimson-sk: #FBE7E9;   /* crimson tint background */
+  --indigo:     #2C3A72;   /* flag border blue — secondary */
+  --indigo-sk:  #E6E9F3;
+  --marigold:   #E8940C;   /* points, highlights */
+  --marigold-sk:#FDF0D9;
+  --win:        #14804A;
+  --win-sk:     #E2F3E9;
+  --loss:       #B3261E;
+
+  /* type */
+  --display: 'Khand', 'Mukta', system-ui, sans-serif;
+  --body:    'Mukta', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono:    'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* scale */
+  --t-hero: 34px;
+  --t-h1:   27px;
+  --t-h2:   21px;
+  --t-h3:   18px;
+  --t-body: 15px;
+  --t-sm:   13.5px;
+  --t-xs:   11.5px;
+
+  /* geometry */
+  --r-lg: 16px;
+  --r:    12px;
+  --r-sm: 8px;
+  --pad:  18px;
+  --shell: 480px;
+
+  --shadow-sm: 0 1px 2px rgba(28, 24, 19, .06);
+  --shadow:    0 2px 10px rgba(28, 24, 19, .08);
+  --shadow-lg: 0 12px 34px rgba(28, 24, 19, .18);
+
+  --ease: cubic-bezier(.2, .9, .3, 1);
+}
+
+/* Optional dark theme — players toggle this from Settings → Theme.
+   Only the tokens change; not a single component rule is duplicated. */
+[data-theme="dark"] {
+  --paper:      #14161F;
+  --card:       #1C1F2B;
+  --card-sunk:  #262A39;
+  --line:       #333849;
+  --line-soft:  #2B2F3E;
+
+  --ink:        #F2EFE7;
+  --ink-2:      #BDB8AC;
+  --ink-3:      #837E73;
+
+  --crimson:    #FF4257;
+  --crimson-dk: #D51A34;
+  --crimson-sk: #33161C;
+  --indigo:     #8CA0E8;
+  --indigo-sk:  #1D2338;
+  --marigold:   #FFB020;
+  --marigold-sk:#332614;
+  --win:        #35D08A;
+  --win-sk:     #14301F;
+  --loss:       #FF8095;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow:    0 2px 12px rgba(0, 0, 0, .45);
+  --shadow-lg: 0 14px 38px rgba(0, 0, 0, .6);
+}
