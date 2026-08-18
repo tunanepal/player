@@ -86,7 +86,9 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
   margin: 24px 0 11px;
 }
 
-/* ──────────────────────────────────────────────────────────── ad banner ── */
+/* ──────────────────────────────────────────────────────────── ad banner ──
+   Swipeable strip: drag with a finger or mouse, tap a dot or an arrow, or
+   let it advance on its own. Auto-advance pauses the moment you touch it. */
 .adstrip {
   position: relative;
   margin-top: 12px;
@@ -94,16 +96,73 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
   overflow: hidden;
   background: var(--card-sunk);
   box-shadow: var(--shadow-sm);
+  touch-action: pan-y;          /* page still scrolls; we handle sideways */
+  user-select: none;
+  cursor: grab;
 }
-.adstrip__track { display: flex; transition: transform .4s var(--ease); }
-.adstrip a, .adstrip .slide { flex: 0 0 100%; display: block; }
-.adstrip img { width: 100%; aspect-ratio: 16 / 7; object-fit: cover; display: block; }
-.adstrip__dots { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: center; gap: 5px; }
-.adstrip__dots i {
-  width: 6px; height: 6px; border-radius: 50%;
+.adstrip:active { cursor: grabbing; }
+.adstrip__track { display: flex; will-change: transform; }
+.adslide { flex: 0 0 100%; min-width: 100%; }
+.adslide a { display: block; }
+.adstrip img {
+  width: 100%; aspect-ratio: 16 / 7; object-fit: cover; display: block;
+  -webkit-user-drag: none;
+}
+
+.adnav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 50%;
+  background: rgba(20, 16, 10, .42);
+  color: #fff; font-size: 21px; line-height: 1;
+  cursor: pointer;
+  opacity: 0; transition: opacity .18s, background .18s;
+}
+.adstrip:hover .adnav { opacity: 1; }
+.adnav:hover { background: rgba(20, 16, 10, .68); }
+.adnav--prev { left: 8px; }
+.adnav--next { right: 8px; }
+@media (hover: none) { .adnav { opacity: .8; } }
+
+.adstrip__dots {
+  position: absolute; bottom: 9px; left: 0; right: 0; z-index: 2;
+  display: flex; justify-content: center; gap: 5px;
+}
+.adstrip__dots button {
+  width: 7px; height: 7px; padding: 0;
+  border: 0; border-radius: 50%;
   background: rgba(255, 255, 255, .55);
+  cursor: pointer;
+  transition: width .22s, background .22s;
 }
-.adstrip__dots i[data-on] { background: #fff; width: 16px; border-radius: 3px; }
+.adstrip__dots button[data-on] { background: #fff; width: 18px; border-radius: 4px; }
+
+/* ──────────────────────────────────────────── live rooms / tournaments ──
+   One pill, two panes. Nothing moves except which pane is shown.        */
+.modeswitch {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  padding: 4px;
+  margin: 18px 0 14px;
+  background: var(--card-sunk);
+  border: 1px solid var(--line);
+  border-radius: 30px;
+}
+.modeswitch button {
+  padding: 10px 8px;
+  border: 0; border-radius: 26px;
+  background: transparent;
+  color: var(--ink-3);
+  font-family: var(--display); font-size: 16px; font-weight: 600;
+  letter-spacing: .07em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background .18s var(--ease), color .18s;
+}
+.modeswitch button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: var(--shadow-sm);
+}
 
 /* ──────────────────────────────────────────────────────── game chooser ── */
 .gamepick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }

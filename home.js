@@ -14,45 +14,129 @@ import {
 import { refreshMe } from './session.js';
 
 let activeGame = 'pubg';
+let mode = 'rooms';        // rooms | tourn
 let rooms = [];
 let pollTimer = null;
 let stopTick = null;
 
-/* ─────────────────────────────────────────────────────────── ad banner ── */
-let adIndex = 0, adTimer = null;
+/* ─────────────────────────────────────────────────────────── ad banner ──
+   A real swipeable strip: drag with a finger or mouse, tap a dot or arrow,
+   or let it advance on its own. Auto-advance stops the moment you touch it,
+   because nothing is worse than a banner moving under your thumb.       */
+let ads = [];
+let adIndex = 0;
+let adTimer = null;
 
-export function paintAds(ads) {
+export function paintAds(list) {
   const wrap = $('#adstrip');
-  if (!ads?.length) { wrap.hidden = true; return; }
+  if (!wrap) return;
+  ads = list || [];
+  clearInterval(adTimer);
+
+  if (!ads.length) { wrap.hidden = true; return; }
   wrap.hidden = false;
+
   wrap.innerHTML = `
     <div class="adstrip__track" id="adTrack">
-      ${ads.map((a) => a.link
-        ? `<a href="${esc(a.link)}" target="_blank" rel="noopener noreferrer"><img src="${esc(a.image_url)}" alt="" loading="lazy"></a>`
-        : `<div class="slide"><img src="${esc(a.image_url)}" alt="" loading="lazy"></div>`).join('')}
+      ${ads.map((a) => `
+        <div class="adslide">
+          ${a.link
+            ? `<a href="${esc(a.link)}" target="_blank" rel="noopener noreferrer" draggable="false">
+                 <img src="${esc(a.image_url)}" alt="" loading="lazy" draggable="false"></a>`
+            : `<img src="${esc(a.image_url)}" alt="" loading="lazy" draggable="false">`}
+        </div>`).join('')}
     </div>
-    ${ads.length > 1 ? `<div class="adstrip__dots" id="adDots">${ads.map((_, i) =>
-      `<i ${i === 0 ? 'data-on' : ''}></i>`).join('')}</div>` : ''}`;
+    ${ads.length > 1 ? `
+      <button class="adnav adnav--prev" id="adPrev" aria-label="Previous banner">&#8249;</button>
+      <button class="adnav adnav--next" id="adNext" aria-label="Next banner">&#8250;</button>
+      <div class="adstrip__dots" id="adDots">
+        ${ads.map((_, i) => `<button data-i="${i}" ${i === 0 ? 'data-on' : ''}
+          aria-label="Banner ${i + 1}"></button>`).join('')}
+      </div>` : ''}`;
 
-  clearInterval(adTimer);
-  if (ads.length > 1) {
-    adIndex = 0;
-    adTimer = setInterval(() => {
-      adIndex = (adIndex + 1) % ads.length;
-      $('#adTrack').style.transform = `translateX(-${adIndex * 100}%)`;
-      $$dots(adIndex);
-    }, 5000);
-  }
+  adIndex = 0;
+  place(false);
+  if (ads.length > 1) { wireSwipe(); autoPlay(); }
 }
 
-function $$dots(active) {
+function place(animate = true) {
+  const track = $('#adTrack');
+  if (!track) return;
+  track.style.transition = animate ? 'transform .38s cubic-bezier(.2,.9,.3,1)' : 'none';
+  track.style.transform = `translateX(-${adIndex * 100}%)`;
   const dots = $('#adDots');
-  if (!dots) return;
-  [...dots.children].forEach((d, i) => d.toggleAttribute('data-on', i === active));
+  if (dots) [...dots.children].forEach((d, i) => d.toggleAttribute('data-on', i === adIndex));
+}
+
+function goAd(i) {
+  adIndex = (i + ads.length) % ads.length;
+  place();
+}
+
+function autoPlay() {
+  clearInterval(adTimer);
+  adTimer = setInterval(() => goAd(adIndex + 1), 5500);
+}
+
+export function stopAds() { clearInterval(adTimer); }
+
+function wireSwipe() {
+  const wrap = $('#adstrip');
+  const track = $('#adTrack');
+  let startX = 0, dx = 0, dragging = false, width = 1;
+
+  $('#adPrev').addEventListener('click', () => { clearInterval(adTimer); goAd(adIndex - 1); autoPlay(); });
+  $('#adNext').addEventListener('click', () => { clearInterval(adTimer); goAd(adIndex + 1); autoPlay(); });
+  $('#adDots').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-i]');
+    if (!b) return;
+    clearInterval(adTimer);
+    goAd(Number(b.dataset.i));
+    autoPlay();
+  });
+
+  const down = (x) => {
+    dragging = true; startX = x; dx = 0;
+    width = wrap.clientWidth || 1;
+    clearInterval(adTimer);
+    track.style.transition = 'none';
+  };
+  const move = (x) => {
+    if (!dragging) return;
+    dx = x - startX;
+    track.style.transform = `translateX(calc(-${adIndex * 100}% + ${dx}px))`;
+  };
+  const up = () => {
+    if (!dragging) return;
+    dragging = false;
+    // a quarter of the width counts as a deliberate swipe
+    if (Math.abs(dx) > width * 0.25) goAd(adIndex + (dx < 0 ? 1 : -1));
+    else place();
+    autoPlay();
+  };
+
+  wrap.addEventListener('touchstart', (e) => down(e.touches[0].clientX), { passive: true });
+  wrap.addEventListener('touchmove',  (e) => move(e.touches[0].clientX), { passive: true });
+  wrap.addEventListener('touchend', up);
+
+  wrap.addEventListener('mousedown', (e) => { e.preventDefault(); down(e.clientX); });
+  window.addEventListener('mousemove', (e) => move(e.clientX));
+  window.addEventListener('mouseup', up);
+
+  // a drag that finishes on a link must not register as a tap on the advert
+  wrap.addEventListener('click', (e) => {
+    if (Math.abs(dx) > 8) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
 }
 
 /* ───────────────────────────────────────────────────────── game chooser ── */
 export function initHome() {
+  $('#modeSwitch').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-m]');
+    if (!b || b.dataset.m === mode) return;
+    setMode(b.dataset.m);
+  });
+
   $('#gamepick').addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-game]');
     if (!btn) return;
@@ -63,6 +147,15 @@ export function initHome() {
   syncGamePick();
 }
 
+function setMode(next) {
+  mode = next;
+  $$('#modeSwitch button').forEach((b) =>
+    b.setAttribute('aria-pressed', String(b.dataset.m === mode)));
+  $('#paneRooms').hidden = mode !== 'rooms';
+  $('#paneTourn').hidden = mode !== 'tourn';
+  showHome();
+}
+
 function syncGamePick() {
   $$g().forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.game === activeGame)));
 }
@@ -71,13 +164,17 @@ const $$g = () => [...$('#gamepick').querySelectorAll('button[data-game]')];
 /* ────────────────────────────────────────────────────────────── loading ── */
 export async function showHome() {
   clearInterval(pollTimer);
-  pollTimer = setInterval(loadRooms, 15000);   // rooms are short-lived; keep fresh
-  await Promise.all([loadRooms(), paintTournaments('tournSlot')]);
+  if (mode === 'rooms') {
+    pollTimer = setInterval(loadRooms, 15000);   // rooms are short-lived; keep fresh
+    await loadRooms();
+  } else {
+    await paintTournaments('tournSlot');
+  }
 }
 
 export function leaveHome() {
   clearInterval(pollTimer);
-  clearInterval(adTimer);
+  stopAds();
   if (stopTick) { stopTick(); stopTick = null; }
 }
 

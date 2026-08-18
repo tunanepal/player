@@ -86,32 +86,34 @@
     <section class="screen" id="screen-home" data-on>
       <div class="adstrip" id="adstrip" hidden></div>
 
-      <div class="section-head" style="margin-top:20px">
-        <h1>Tournaments</h1>
-        <span class="eyebrow">Run by Tunanepal</span>
-      </div>
-      <div id="tournSlot"></div>
-
-      <div class="section-head" style="margin-top:26px">
-        <h1>Live rooms</h1>
-        <span class="eyebrow">10 min each</span>
-      </div>
-      <p class="small muted">Pick a game to see the rooms waiting for an opponent.</p>
-
-      <div class="gamepick" id="gamepick">
-        <button data-game="pubg" aria-pressed="true">
-          <span class="g-mark" aria-hidden="true"></span>
-          <span class="g-name">PUBG</span>
-          <span class="g-count">—</span>
-        </button>
-        <button data-game="freefire" aria-pressed="false">
-          <span class="g-mark" aria-hidden="true"></span>
-          <span class="g-name">Free Fire</span>
-          <span class="g-count">—</span>
-        </button>
+      <div class="modeswitch" id="modeSwitch">
+        <button data-m="rooms" aria-pressed="true">Live rooms</button>
+        <button data-m="tourn" aria-pressed="false">Tournaments</button>
       </div>
 
-      <div id="roomList" style="margin-top:16px"></div>
+      <div id="paneRooms">
+        <p class="small muted" style="margin-bottom:2px">Pick a game to see the rooms waiting for an opponent.</p>
+
+        <div class="gamepick" id="gamepick">
+          <button data-game="pubg" aria-pressed="true">
+            <span class="g-mark" aria-hidden="true"></span>
+            <span class="g-name">PUBG</span>
+            <span class="g-count">—</span>
+          </button>
+          <button data-game="freefire" aria-pressed="false">
+            <span class="g-mark" aria-hidden="true"></span>
+            <span class="g-name">Free Fire</span>
+            <span class="g-count">—</span>
+          </button>
+        </div>
+
+        <div id="roomList" style="margin-top:16px"></div>
+      </div>
+
+      <div id="paneTourn" hidden>
+        <p class="small muted" style="margin-bottom:12px">Events run by Tunanepal. Register, get confirmed, play.</p>
+        <div id="tournSlot"></div>
+      </div>
     </section>
 
     <!-- ───────────────────────────────────────────────────────── LOAD ── -->
