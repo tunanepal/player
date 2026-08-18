@@ -182,7 +182,7 @@ function updatePot() {
 /* ───────────────────────────────────────────────────────── your open room ── */
 async function loadMyRoom() {
   try { myRoom = await rpcAuth('tuna_my_room'); }
-  catch { myRoom = null; }
+  catch (e) { myRoom = null; toast(e.message, 'bad'); }
   paintMyRoom();
 }
 

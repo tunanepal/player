@@ -114,10 +114,15 @@ function paneDeposit() {
 async function loadQr() {
   const slot = $('#qrSlot');
   if (!slot) return;
+  let failed = null;
   try {
     qr = await rpcAuth('tuna_active_qr', { p_method: method });
-  } catch { qr = null; }
+  } catch (e) { qr = null; failed = e.message; }
 
+  if (failed) {
+    slot.innerHTML = `<div class="alert alert--bad">${esc(failed)}</div>`;
+    return;
+  }
   if (!qr) {
     slot.innerHTML = `<div class="alert alert--info">
       No ${method === 'esewa' ? 'eSewa' : 'Khalti'} QR is active right now.
@@ -246,7 +251,10 @@ function paneWithdraw() {
 async function paneStore() {
   $('#loadPane').innerHTML = `<div id="packSlot">${skeletons(2, 70)}</div>`;
   try { packs = await rpcAuth('tuna_uc_packs') || []; }
-  catch { packs = []; }
+  catch (e) {
+    $('#packSlot').innerHTML = `<div class="alert alert--bad">${esc(e.message)}</div>`;
+    return;
+  }
 
   if (!packs.length) {
     $('#packSlot').innerHTML = emptyState('Store is empty', 'UC packs will appear here soon.');
@@ -321,8 +329,10 @@ async function packForm() {
 
   let sMethod = 'esewa';
   const paintQr = async () => {
-    let q = null;
-    try { q = await rpcAuth('tuna_active_qr', { p_method: sMethod }); } catch {}
+    let q = null, qErr = null;
+    try { q = await rpcAuth('tuna_active_qr', { p_method: sMethod }); }
+    catch (e) { qErr = e.message; }
+    if (qErr) { $('#sQrSlot').innerHTML = `<div class="alert alert--bad">${esc(qErr)}</div>`; return; }
     $('#sQrSlot').innerHTML = q
       ? `<div class="qrbox"><img src="${esc(q.image_url)}" alt="QR" loading="lazy">
            <div class="qrbox__meta">
@@ -373,7 +383,7 @@ async function packForm() {
 /* ═══════════════════════════════════════════════════════════════ HISTORY ══ */
 async function loadHistory() {
   try { history = await rpcAuth('tuna_history'); }
-  catch { return; }
+  catch (e) { toast(e.message, 'bad'); return; }
 
   const rows = tab === 'deposit' ? history.deposits
              : tab === 'withdraw' ? history.withdrawals
