@@ -11,6 +11,26 @@ import {
 import { refreshMe } from './session.js';
 
 let list = [];
+const wired = new Set();
+
+/* One listener per container instead of one per button. Re-rendering the
+   list can never leave a dead card behind. */
+function delegate(el) {
+  if (!el || wired.has(el)) return;
+  wired.add(el);
+  el.addEventListener('click', (e) => {
+    const hit = e.target.closest('[data-tourn]');
+    if (!hit || !el.contains(hit)) return;
+    sheet(Number(hit.dataset.tourn));
+  });
+  el.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const hit = e.target.closest('[data-tourn]');
+    if (!hit) return;
+    e.preventDefault();
+    sheet(Number(hit.dataset.tourn));
+  });
+}
 
 /* ────────────────────────────────────────────────────────── home section ── */
 export async function paintTournaments(slotId, game = null) {
@@ -33,9 +53,11 @@ export async function paintTournaments(slotId, game = null) {
   }
 
   slot.innerHTML = list.map(card).join('');
-  $$('[data-tourn]', slot).forEach((b) =>
-    b.addEventListener('click', () => sheet(Number(b.dataset.tourn))));
+  delegate(slot);
 }
+
+/* My games renders its own cards, so it opts in through this. */
+export function wireTournamentCards(el) { delegate(el); }
 
 function regPill(t) {
   if (t.my_status === 'confirmed') return '<span class="pill pill--win">Confirmed</span>';
@@ -50,7 +72,8 @@ function regPill(t) {
 function card(t) {
   const pct = Math.min(100, Math.round((t.taken / t.max_slots) * 100));
   return `
-  <article class="tourn">
+  <article class="tourn tourn--tap" data-tourn="${t.id}" role="button" tabindex="0"
+           aria-label="${esc(t.title)} — open details">
     ${t.banner_url
       ? `<img class="tourn__banner" src="${esc(t.banner_url)}" alt="" loading="lazy">`
       : `<div class="tourn__banner tourn__banner--blank">
@@ -88,17 +111,24 @@ function card(t) {
           <div><small>Password</small><b>${esc(t.room_pass || '—')}</b></div>
         </div>` : ''}
 
-      <button class="btn ${t.my_status ? 'btn--ghost' : ''}" data-tourn="${t.id}">
-        ${t.my_status ? 'View details' : t.reg_open_now ? 'Register' : 'View details'}
-      </button>
+      <span class="btn ${t.my_status ? 'btn--ghost' : ''}" role="presentation">
+        ${t.my_status ? 'View details' : t.reg_open_now ? 'Register now' : 'View details'}
+      </span>
     </div>
   </article>`;
 }
 
 /* ───────────────────────────────────────────────────────── detail sheet ── */
 async function sheet(id) {
-  const t = list.find((x) => x.id === id);
-  if (!t) return;
+  let t = list.find((x) => x.id === id);
+  if (!t) {
+    /* opened from My games, where the local list is a different one */
+    try {
+      const mine = await rpcAuth('tuna_my_tournaments') || [];
+      t = mine.find((x) => x.id === id);
+    } catch (e) { return toast(e.message, 'bad'); }
+  }
+  if (!t) return toast('That tournament is no longer listed.', 'bad');
 
   const dates = [
     ['Registration opens', t.reg_opens_at],
@@ -174,7 +204,7 @@ async function sheet(id) {
       closeSheet();
       toast('Registered. An admin will confirm your slot.', 'good');
       await refreshMe();
-      paintTournaments('tournSlot');
+      if ($('#tournSlot')) paintTournaments('tournSlot');
     } catch (ex) { showError(err, ex.message); }
   });
 }
@@ -188,7 +218,8 @@ export function myTournamentCard(t) {
   const soon = new Date(t.starts_at) - Date.now();
   const mins = Math.round(soon / 60000);
   return `
-  <article class="card room">
+  <article class="card room tourn--tap" data-tourn="${t.id}" role="button" tabindex="0"
+           aria-label="${esc(t.title)} — open details">
     <div class="room__top">
       <div class="room__title">
         <span class="pennant pennant--indigo">Tournament</span>

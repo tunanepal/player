@@ -8,7 +8,7 @@ import {
   emptyState, skeletons, openSheet, closeSheet
 } from './ui.js';
 import { refreshMe } from './session.js';
-import { myTournaments, myTournamentCard } from './tourney.js';
+import { myTournaments, myTournamentCard, wireTournamentCards } from './tourney.js';
 
 let games = [];
 let tourns = [];
@@ -71,6 +71,8 @@ function render() {
 
   $$('[data-claim]').forEach((b) =>
     b.addEventListener('click', () => claimSheet(Number(b.dataset.claim))));
+
+  wireTournamentCards($('#gamesBody'));
 }
 
 function statusPill(g) {

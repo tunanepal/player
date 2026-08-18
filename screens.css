@@ -646,3 +646,11 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
 
 .slotbar { height: 5px; border-radius: 3px; background: var(--card-sunk); overflow: hidden; margin-bottom: 8px; }
 .slotbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--marigold), var(--crimson)); }
+
+/* the whole tournament card is the tap target, so the pointer says so */
+.tourn--tap { cursor: pointer; transition: transform .14s var(--ease), border-color .14s; }
+.tourn--tap:hover { border-color: var(--ink-3); }
+.tourn--tap:active { transform: scale(.994); }
+.tourn--tap:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+/* the call-to-action is a label now, not a button — keep it looking the same */
+.tourn--tap .btn { width: 100%; pointer-events: none; }
