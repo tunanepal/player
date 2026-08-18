@@ -3,13 +3,13 @@
    Supabase calls always go to the network — stale points would be worse than
    an error message. */
 
-const CACHE = 'tuna-v7';
+const CACHE = 'tuna-v8';
 const SHELL = [
   './', './index.html', './manifest.json',
   './tokens.css', './base.css', './screens.css',
   './config.js', './api.js', './ui.js',
   './session.js', './auth.js', './home.js', './load.js',
-  './customs.js', './games.js', './settings.js', './main.js',
+  './customs.js', './games.js', './settings.js', './tourney.js', './main.js',
   './icon-192.png'
 ];
 

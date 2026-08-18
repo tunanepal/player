@@ -540,3 +540,50 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
 .owedbox b { font-family: var(--mono); font-size: 19px; color: var(--crimson-dk); }
 .owedbox p { font-size: var(--t-xs); color: var(--ink-2); max-width: 22ch; }
 [data-theme="dark"] .owedbox small, [data-theme="dark"] .owedbox b { color: var(--crimson); }
+
+/* ══════════════════════════════════════════════════════════ tournaments ══ */
+.tourn {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--card);
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.tourn__banner { width: 100%; aspect-ratio: 16 / 7; object-fit: cover; display: block; }
+.tourn__banner--blank {
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--crimson), #6E1030);
+}
+.tourn__banner--blank span {
+  font-family: var(--display); font-size: 30px; font-weight: 700;
+  letter-spacing: .06em; color: rgba(255, 255, 255, .82);
+}
+.tourn__body { padding: 14px; }
+.tourn__head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.tourn__head h3 { font-size: 20px; }
+.tourn__head small { display: block; color: var(--ink-3); font-size: var(--t-sm); }
+.tourn__meta {
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  font-size: var(--t-sm); color: var(--ink-3); margin-bottom: 10px;
+}
+.tourn__meta b { color: var(--ink); font-weight: 600; }
+
+/* 1st / 2nd / 3rd, gold-silver-bronze rail on the left of each cell */
+.prizerow {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--line); border: 1px solid var(--line);
+  border-radius: var(--r-sm); overflow: hidden; margin-bottom: 12px;
+}
+.prizerow > div { position: relative; background: var(--card-sunk); padding: 9px 10px 9px 13px; }
+.prizerow > div::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+}
+.prizerow > div:nth-child(1)::before { background: #E8940C; }
+.prizerow > div:nth-child(2)::before { background: #9AA3B8; }
+.prizerow > div:nth-child(3)::before { background: #B4713A; }
+.prizerow small { display: block; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.prizerow b { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--ink); }
+
+.slotbar { height: 5px; border-radius: 3px; background: var(--card-sunk); overflow: hidden; margin-bottom: 8px; }
+.slotbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--marigold), var(--crimson)); }

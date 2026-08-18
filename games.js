@@ -8,15 +8,21 @@ import {
   emptyState, skeletons, openSheet, closeSheet
 } from './ui.js';
 import { refreshMe } from './session.js';
+import { myTournaments, myTournamentCard } from './tourney.js';
 
 let games = [];
+let tourns = [];
 let filter = 'all';
 
 export async function showGames() {
   const body = $('#gamesBody');
   if (!games.length) body.innerHTML = skeletons(3, 120);
-  try { games = await rpcAuth('tuna_my_games') || []; }
-  catch (e) { body.innerHTML = emptyState('Could not load', e.message); return; }
+  try {
+    [games, tourns] = await Promise.all([
+      rpcAuth('tuna_my_games').then((r) => r || []),
+      myTournaments()
+    ]);
+  } catch (e) { body.innerHTML = emptyState('Could not load', e.message); return; }
   render();
 }
 
@@ -46,9 +52,14 @@ function render() {
       <button data-f="live" aria-pressed="${filter === 'live'}">In play</button>
       <button data-f="won"  aria-pressed="${filter === 'won'}">Won</button>
       <button data-f="lost" aria-pressed="${filter === 'lost'}">Lost</button>
+      <button data-f="tourn" aria-pressed="${filter === 'tourn'}">Tournaments${
+        tourns.length ? ` (${tourns.length})` : ''}</button>
     </div>
 
-    ${shown.length ? shown.map(card).join('')
+    ${filter === 'tourn'
+      ? (tourns.length ? tourns.map(myTournamentCard).join('')
+         : emptyState('No tournaments joined', 'Register for one from the Home tab.'))
+      : shown.length ? shown.map(card).join('')
       : emptyState('Nothing here yet', 'Join a room from Home and your matches show up here.')}`;
 
   $('#gFilter').addEventListener('click', (e) => {

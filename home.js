@@ -6,6 +6,7 @@
 import { rpcAuth } from './api.js';
 import { GAMES } from './config.js';
 import { SCHEMA } from './customs.js';
+import { paintTournaments } from './tourney.js';
 import {
   $, esc, money, when, mmss, onTick, toast, openSheet, closeSheet,
   busy, showError, clearError, emptyState, skeletons, avatarHTML
@@ -71,7 +72,7 @@ const $$g = () => [...$('#gamepick').querySelectorAll('button[data-game]')];
 export async function showHome() {
   clearInterval(pollTimer);
   pollTimer = setInterval(loadRooms, 15000);   // rooms are short-lived; keep fresh
-  await loadRooms();
+  await Promise.all([loadRooms(), paintTournaments('tournSlot')]);
 }
 
 export function leaveHome() {

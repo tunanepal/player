@@ -18,7 +18,7 @@ export const SCHEMA = {
     label: 'PUBG Mobile',
     fields: [
       { key: 'match_type', label: 'Match type', type: 'choice',
-        values: ['TDM', 'Classic', 'Arena', 'Sniper Training', 'Domination'], def: 'TDM' },
+        values: ['TDM', 'Arena', 'Sniper Training', 'Domination'], def: 'TDM' },
       { key: 'team_size', label: 'Players', type: 'choice',
         values: ['1v1', '2v2', '4v4'], def: '1v1' },
       { key: 'map', label: 'Map', type: 'choice',
@@ -43,7 +43,7 @@ export const SCHEMA = {
     label: 'Free Fire',
     fields: [
       { key: 'match_type', label: 'Match type', type: 'choice',
-        values: ['Clash Squad', 'Battle Royale', 'Lone Wolf'], def: 'Clash Squad' },
+        values: ['Clash Squad', 'Lone Wolf'], def: 'Clash Squad' },
       { key: 'team_size', label: 'Players', type: 'choice',
         values: ['1v1', '2v2', '3v3', '4v4'], def: '1v1' },
       { key: 'map', label: 'Map', type: 'choice',
