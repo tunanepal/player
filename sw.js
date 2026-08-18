@@ -3,13 +3,13 @@
    Supabase calls always go to the network — stale points would be worse than
    an error message. */
 
-const CACHE = 'tuna-v1';
+const CACHE = 'tuna-v2';
 const SHELL = [
   './', './index.html', './manifest.json',
-  './css/tokens.css', './css/base.css', './css/screens.css',
-  './js/config.js', './js/api.js', './js/ui.js',
-  './js/session.js', './js/home.js', './js/main.js',
-  './icons/icon-192.png'
+  './tokens.css', './base.css', './screens.css',
+  './config.js', './api.js', './ui.js',
+  './session.js', './home.js', './main.js',
+  './icon-192.png'
 ];
 
 self.addEventListener('install', (e) => {
