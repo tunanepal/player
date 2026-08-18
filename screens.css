@@ -442,3 +442,85 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
 }
 .stars button:hover { transform: scale(1.12); }
 .stars button[data-on] { color: var(--marigold); }
+
+/* ═════════════════════════════════════════════════ rulebook + agreement ══ */
+
+.field--tight { margin-bottom: 10px; }
+.seg--wrap { flex-wrap: wrap; }
+.seg--wrap button { flex: 0 1 auto; min-width: 0; padding: 8px 12px; font-size: 14px; }
+
+.rulebook {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--card-sunk);
+  padding: 14px;
+  margin-bottom: 14px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.rulebook__title { margin: 0 0 10px; color: var(--crimson); }
+
+.rulelist { list-style: none; margin: 0; padding: 0; }
+
+.rule-head {
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--display); font-size: 16px; font-weight: 600;
+  color: var(--ink);
+  margin: 14px 0 7px;
+}
+.rule-head::before {
+  content: ''; width: 8px; height: 8px; flex-shrink: 0;
+  background: var(--indigo); transform: rotate(45deg);
+}
+.rule-head:first-child { margin-top: 0; }
+
+.rule {
+  display: flex; gap: 8px;
+  font-size: var(--t-sm); line-height: 1.45;
+  padding: 3px 0 3px 4px;
+}
+.rule > span { flex-shrink: 0; font-weight: 700; width: 14px; text-align: center; }
+.rule--no      { color: var(--crimson); }
+.rule--no > span { color: var(--crimson); }
+.rule--yes     { color: var(--win); }
+.rule--neutral { color: var(--ink-2); }
+.rule--neutral > span { color: var(--ink-3); }
+
+.rule-warn {
+  margin: 9px 0;
+  padding: 9px 11px;
+  border: 1px solid var(--crimson);
+  border-left-width: 3px;
+  border-radius: var(--r-sm);
+  background: var(--crimson-sk);
+  color: var(--crimson-dk);
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+[data-theme="dark"] .rule-warn { color: var(--crimson); }
+
+.rule-text { font-size: var(--t-sm); color: var(--ink-2); margin: 6px 0; }
+
+/* the gate itself */
+.agree {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 13px; margin-bottom: 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--card);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.agree:hover { border-color: var(--ink-3); }
+.agree[data-on] { border-color: var(--win); background: var(--win-sk); }
+.agree input[type=checkbox] {
+  width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
+  accent-color: var(--win); cursor: pointer;
+}
+.agree span { font-size: var(--t-sm); color: var(--ink-2); line-height: 1.4; }
+.agree[data-on] span { color: var(--win); font-weight: 600; }
+
+.spec { grid-template-columns: repeat(2, 1fr); }
+.spec b.yes { color: var(--win); }
+.spec b.no  { color: var(--loss); }
+[data-theme="dark"] .spec b.no { color: var(--crimson); }

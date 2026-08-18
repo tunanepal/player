@@ -1,37 +1,88 @@
 /* Tunanepal — Customs.
-   Post a room with your own rules. Your stake is held the moment you post,
-   and comes straight back if nobody joins inside ten minutes. */
+   Post a room with every setting pinned down, so the joiner knows exactly
+   what they are walking into and nobody can argue about it afterwards. */
 
 import { rpcAuth } from './api.js';
-import { TEAM_SIZES, GUN_TYPES } from './config.js';
 import {
-  $, $$, esc, money, mmss, onTick, toast, busy, showError, clearError, emptyState
+  $, $$, esc, money, mmss, onTick, toast, busy, showError, clearError
 } from './ui.js';
 import { state, refreshMe } from './session.js';
 
+/* ─────────────────────────────────────────────── what each game can set ──
+   choice → a row of buttons, one selected
+   yn     → yes / no
+   Anything flagged `opt` is stored in the room's options JSON, so new
+   settings can be added here without another database migration.        */
+export const SCHEMA = {
+  pubg: {
+    label: 'PUBG Mobile',
+    fields: [
+      { key: 'match_type', label: 'Match type', type: 'choice',
+        values: ['TDM', 'Classic', 'Arena', 'Sniper Training', 'Domination'], def: 'TDM' },
+      { key: 'team_size', label: 'Players', type: 'choice',
+        values: ['1v1', '2v2', '4v4'], def: '1v1' },
+      { key: 'map', label: 'Map', type: 'choice',
+        values: ['Warehouse', 'Ruins', 'Hangar', 'Erangel', 'Miramar', 'Sanhok', 'Livik'], def: 'Warehouse' },
+      { key: 'gun_type', label: 'Gun type', type: 'choice',
+        values: ['AR', 'SMG', 'SNIPER', 'SHOTGUN', 'PISTOL', 'All guns'], def: 'AR' },
+      { key: 'rounds', label: 'Rounds', type: 'choice',
+        values: ['3', '5', '7', '10'], def: '5' },
+      { key: 'perspective', label: 'Perspective', type: 'choice',
+        values: ['TPP', 'FPP'], def: 'TPP', opt: true },
+      { key: 'scope', label: 'Scopes allowed', type: 'yn', def: true, opt: true },
+      { key: 'grenades', label: 'Grenades', type: 'yn', def: false, opt: true },
+      { key: 'healing', label: 'Healing items', type: 'yn', def: false, opt: true },
+      { key: 'vehicles', label: 'Vehicles', type: 'yn', def: false, opt: true },
+      { key: 'level4_helmet', label: 'Level 4 helmet', type: 'yn', def: false, opt: true },
+      { key: 'gun_chips', label: 'Gun chips', type: 'yn', def: false, opt: true },
+      { key: 'loadout', label: 'Loadout compulsory', type: 'yn', def: true, opt: true },
+      { key: 'spectators', label: 'Spectators allowed', type: 'yn', def: false, opt: true }
+    ]
+  },
+  freefire: {
+    label: 'Free Fire',
+    fields: [
+      { key: 'match_type', label: 'Match type', type: 'choice',
+        values: ['Clash Squad', 'Battle Royale', 'Lone Wolf'], def: 'Clash Squad' },
+      { key: 'team_size', label: 'Players', type: 'choice',
+        values: ['1v1', '2v2', '3v3', '4v4'], def: '1v1' },
+      { key: 'map', label: 'Map', type: 'choice',
+        values: ['Bermuda', 'Purgatory', 'Kalahari', 'Alpine', 'Nexterra'], def: 'Bermuda' },
+      { key: 'rounds', label: 'Rounds', type: 'choice',
+        values: ['7', '9', '13'], def: '7' },
+      { key: 'coins', label: 'Starting coins', type: 'choice',
+        values: ['500', '1000', '2000', '5000', '9000'], def: '5000', opt: true },
+      { key: 'gun_limit', label: 'Gun restriction', type: 'choice',
+        values: ['All guns', 'AR only', 'SMG only', 'Sniper only', 'Shotgun only', 'Pistol only'],
+        def: 'All guns', opt: true },
+      { key: 'headshot', label: 'Headshot only', type: 'yn', def: true },
+      { key: 'limited_ammo', label: 'Limited ammo', type: 'yn', def: false },
+      { key: 'throwables', label: 'Throwables', type: 'yn', def: false },
+      { key: 'gun_attr', label: 'Gun attributes', type: 'yn', def: false },
+      { key: 'char_skill', label: 'Character skills', type: 'yn', def: false },
+      { key: 'advanced_settings', label: 'Advanced settings', type: 'yn', def: true, opt: true },
+      { key: 'loadout', label: 'Loadout compulsory', type: 'yn', def: true, opt: true },
+      { key: 'airdrop', label: 'Airdrops', type: 'yn', def: false, opt: true },
+      { key: 'gloo_meter', label: 'Gloo wall meter', type: 'yn', def: false, opt: true },
+      { key: 'turrets', label: 'Turrets', type: 'yn', def: false, opt: true },
+      { key: 'random_store', label: 'Random store', type: 'yn', def: false, opt: true },
+      { key: 'spectators', label: 'Spectators allowed', type: 'yn', def: false, opt: true }
+    ]
+  }
+};
+
 let game = 'pubg';
+let values = {};
 let myRoom = null;
 let stopTick = null;
 
-const form = {
-  team_size: '1v1',
-  gun_type: 'AR',
-  headshot: true,
-  limited_ammo: false,
-  throwables: true,
-  gun_attr: false,
-  char_skill: false
-};
-
-const FF_RULES = [
-  ['headshot',     'Headshot only'],
-  ['limited_ammo', 'Limited ammo'],
-  ['throwables',   'Throwables'],
-  ['gun_attr',     'Gun attributes'],
-  ['char_skill',   'Character skills']
-];
+function resetValues() {
+  values = {};
+  for (const f of SCHEMA[game].fields) values[f.key] = f.def;
+}
 
 export async function showCustoms() {
+  if (!Object.keys(values).length) resetValues();
   render();
   await loadMyRoom();
 }
@@ -59,46 +110,28 @@ function render() {
     <div class="card" style="margin-top:16px">
       <div class="alert alert--bad" id="cErr" hidden></div>
 
-      <label class="field">
-        <span class="label">Players</span>
-        <div class="seg" id="segTeam">
-          ${TEAM_SIZES.map((t) => `<button type="button" data-v="${t}"
-            aria-pressed="${form.team_size === t}">${t}</button>`).join('')}
-        </div>
-      </label>
-
-      ${game === 'pubg' ? `
-      <label class="field">
-        <span class="label">Gun type</span>
-        <div class="seg" id="segGun">
-          ${GUN_TYPES.map((g) => `<button type="button" data-v="${g}"
-            aria-pressed="${form.gun_type === g}">${g}</button>`).join('')}
-        </div>
-      </label>` : `
-      ${FF_RULES.map(([key, label]) => `
-      <label class="field">
-        <span class="label">${label}</span>
-        <div class="seg seg--yn" data-rule="${key}">
-          <button type="button" data-v="1" aria-pressed="${form[key] === true}">Yes</button>
-          <button type="button" data-v="0" aria-pressed="${form[key] === false}">No</button>
-        </div>
-      </label>`).join('')}`}
+      <p class="eyebrow" style="margin-bottom:10px">Match settings</p>
+      ${SCHEMA[game].fields.map(fieldHTML).join('')}
 
       <hr class="divider">
+      <p class="eyebrow" style="margin-bottom:10px">Stake</p>
 
       <label class="field">
         <span class="label">Amount each side puts in</span>
         <div class="chiprow" id="amtChips">
-          ${[20, 50, 100, 200, 500].map((a) =>
+          ${[10, 20, 30, 50, 100, 200, 500].map((a) =>
             `<button type="button" data-a="${a}">${a}</button>`).join('')}
         </div>
         <input id="cAmount" class="mono" type="number" inputmode="numeric" min="1" placeholder="Enter amount">
         <span class="hint" id="potHint">Winner takes the pot minus 12% commission.</span>
       </label>
 
+      <hr class="divider">
+      <p class="eyebrow" style="margin-bottom:10px">Room details — hidden until someone joins</p>
+
       <label class="field">
-        <span class="label">Game name (in-game lobby name)</span>
-        <input id="cGameName" type="text" maxlength="40" placeholder="Shown only after someone joins">
+        <span class="label">Game name (your in-game name)</span>
+        <input id="cGameName" type="text" maxlength="40" placeholder="So your opponent can find you">
       </label>
 
       <div class="two-up">
@@ -112,10 +145,10 @@ function render() {
         </label>
       </div>
 
-      <p class="xs muted" style="margin-bottom:14px">
-        The game name, room ID and password stay hidden from everyone until an
-        opponent pays in. Your stake is held now and returned if nobody joins.
-      </p>
+      <div class="alert alert--info">
+        Set your in-game room to match these settings exactly. If it does not
+        match, the joiner can claim a refund and you lose the stake.
+      </div>
 
       <button class="btn" id="cSubmit">Post room</button>
     </div>`;
@@ -123,23 +156,42 @@ function render() {
   wire();
 }
 
+function fieldHTML(f) {
+  if (f.type === 'yn') {
+    return `<label class="field field--tight">
+      <span class="label">${esc(f.label)}</span>
+      <div class="seg seg--yn" data-f="${f.key}">
+        <button type="button" data-v="1" aria-pressed="${values[f.key] === true}">Yes</button>
+        <button type="button" data-v="0" aria-pressed="${values[f.key] === false}">No</button>
+      </div>
+    </label>`;
+  }
+  return `<label class="field field--tight">
+    <span class="label">${esc(f.label)}</span>
+    <div class="seg seg--wrap" data-f="${f.key}">
+      ${f.values.map((v) => `<button type="button" data-v="${esc(v)}"
+        aria-pressed="${String(values[f.key]) === String(v)}">${esc(v)}</button>`).join('')}
+    </div>
+  </label>`;
+}
+
 function wire() {
   $('#cGamePick').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-g]');
     if (!b || b.dataset.g === game) return;
     game = b.dataset.g;
+    resetValues();
     render();
     loadMyRoom();
   });
 
-  segment('#segTeam', (v) => { form.team_size = v; });
-  segment('#segGun', (v) => { form.gun_type = v; });
-
-  $$('[data-rule]').forEach((seg) => {
+  $$('[data-f]').forEach((seg) => {
     seg.addEventListener('click', (e) => {
       const b = e.target.closest('button[data-v]');
       if (!b) return;
-      form[seg.dataset.rule] = b.dataset.v === '1';
+      const key = seg.dataset.f;
+      const f = SCHEMA[game].fields.find((x) => x.key === key);
+      values[key] = f.type === 'yn' ? b.dataset.v === '1' : b.dataset.v;
       [...seg.children].forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
     });
   });
@@ -148,23 +200,12 @@ function wire() {
     const b = e.target.closest('button[data-a]');
     if (!b) return;
     $('#cAmount').value = b.dataset.a;
-    $$('#amtChips button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    [...$('#amtChips').children].forEach((c) => c.toggleAttribute('data-on', c === b));
     updatePot();
   });
 
   $('#cAmount').addEventListener('input', updatePot);
   $('#cSubmit').addEventListener('click', submit);
-}
-
-function segment(sel, set) {
-  const el = $(sel);
-  if (!el) return;
-  el.addEventListener('click', (e) => {
-    const b = e.target.closest('button[data-v]');
-    if (!b) return;
-    set(b.dataset.v);
-    [...el.children].forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
-  });
 }
 
 function updatePot() {
@@ -201,9 +242,9 @@ function paintMyRoom() {
       <div class="room__top">
         <div class="room__title">
           <span class="pennant">Waiting for opponent</span>
-          <h3 style="margin-top:8px">${esc(myRoom.team_size.toUpperCase())} ·
-            ${esc(myRoom.game === 'pubg' ? 'PUBG' : 'Free Fire')}</h3>
-          <small>Your room is live on the Home tab</small>
+          <h3 style="margin-top:8px">${esc((myRoom.team_size || '').toUpperCase())} ·
+            ${esc(myRoom.match_type || (myRoom.game === 'pubg' ? 'PUBG' : 'Free Fire'))}</h3>
+          <small>Live on the Home tab now</small>
         </div>
         <div class="room__stake"><b>${money(myRoom.amount)}</b><small>per side</small></div>
       </div>
@@ -270,27 +311,27 @@ async function submit(e) {
   if (!amount || amount < 1) return showError(err, 'Enter the amount each side puts in.');
   if (amount > state.player.points)
     return showError(err, `Not enough points. You have ${money(state.player.points)} — load your wallet first.`);
-  if (!gameName) return showError(err, 'Enter the game name.');
+  if (!gameName) return showError(err, 'Enter your in-game name.');
   if (!roomId) return showError(err, 'Enter the room ID.');
   if (!roomPass) return showError(err, 'Enter the room password.');
 
+  const options = {};
   const args = {
     p_game: game,
-    p_team_size: form.team_size,
     p_amount: amount,
     p_game_name: gameName,
     p_room_code: roomId,
     p_room_pass: roomPass
   };
-  if (game === 'pubg') {
-    args.p_gun_type = form.gun_type;
-  } else {
-    args.p_headshot = form.headshot;
-    args.p_limited_ammo = form.limited_ammo;
-    args.p_throwables = form.throwables;
-    args.p_gun_attr = form.gun_attr;
-    args.p_char_skill = form.char_skill;
+
+  for (const f of SCHEMA[game].fields) {
+    const v = values[f.key];
+    if (f.opt) { options[f.key] = v; continue; }
+    if (f.key === 'team_size') args.p_team_size = v;
+    else if (f.key === 'rounds') args.p_rounds = parseInt(v, 10) || null;
+    else args['p_' + f.key] = v;
   }
+  args.p_options = options;
 
   try {
     const out = await busy(e.currentTarget, 'Posting…', () => rpcAuth('tuna_create_room', args));
