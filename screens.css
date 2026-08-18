@@ -253,8 +253,11 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
 }
 
 /* ──────────────────────────────────────────────────────── misc screens ── */
-.tabs-inline { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 14px; }
-.tabs-inline::-webkit-scrollbar { display: none; }
+.tabs-inline {
+  display: flex; gap: 6px; margin-bottom: 14px;
+  flex-wrap: wrap;
+  justify-content: center;   /* sits centred under its heading */
+}
 .tabs-inline button {
   flex-shrink: 0;
   padding: 7px 14px;
@@ -524,3 +527,16 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
 .spec b.yes { color: var(--win); }
 .spec b.no  { color: var(--loss); }
 [data-theme="dark"] .spec b.no { color: var(--crimson); }
+
+
+/* what a player still owes, shown on Settings so it is never a surprise */
+.owedbox {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px; margin-bottom: 14px;
+  border: 1px solid var(--crimson); border-left-width: 3px;
+  border-radius: var(--r-sm); background: var(--crimson-sk);
+}
+.owedbox small { display: block; font-size: var(--t-xs); letter-spacing: .1em; text-transform: uppercase; color: var(--crimson-dk); }
+.owedbox b { font-family: var(--mono); font-size: 19px; color: var(--crimson-dk); }
+.owedbox p { font-size: var(--t-xs); color: var(--ink-2); max-width: 22ch; }
+[data-theme="dark"] .owedbox small, [data-theme="dark"] .owedbox b { color: var(--crimson); }

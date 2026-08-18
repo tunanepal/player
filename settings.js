@@ -143,17 +143,30 @@ async function history() {
       <button data-h="deposits" aria-pressed="false">Deposits</button>
       <button data-h="withdrawals" aria-pressed="false">Withdrawals</button>
       <button data-h="purchases" aria-pressed="false">UC orders</button>
+      <button data-h="fines" aria-pressed="false">Fines</button>
     </div>
     <div id="hBody">${skeletons(4, 56)}</div>`);
 
   let data = null;
-  try { data = await rpcAuth('tuna_history'); }
-  catch (e) { $('#hBody').innerHTML = emptyState('Could not load', e.message); return; }
+  try {
+    data = await rpcAuth('tuna_history');
+    data.fines = await rpcAuth('tuna_my_fines') || [];
+  } catch (e) { $('#hBody').innerHTML = emptyState('Could not load', e.message); return; }
 
   const paint = (key) => {
     const rows = data[key] || [];
     if (!rows.length) {
       $('#hBody').innerHTML = emptyState('Nothing here', 'This list is still empty.');
+      return;
+    }
+    if (key === 'fines') {
+      $('#hBody').innerHTML = rows.map((r) => `
+        <div class="listrow">
+          <div class="grow"><b>${esc(r.reason)}</b>
+            <small>${esc(when(r.created_at))} · ${money(r.collected)} of ${money(r.amount)} taken</small></div>
+          <span class="pill ${r.outstanding > 0 ? 'pill--bad' : 'pill--win'}">
+            ${r.outstanding > 0 ? money(r.outstanding) + ' owed' : 'cleared'}</span>
+        </div>`).join('');
       return;
     }
     $('#hBody').innerHTML = rows.map((r) => key === 'ledger' ? `
