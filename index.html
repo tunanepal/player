@@ -24,7 +24,7 @@
 <!-- ══════════════════════════════════════════════════════════ sign in ══ -->
 <section id="gate" hidden>
   <div class="gate__art" aria-hidden="true">
-    <svg viewBox="0 0 480 400" preserveAspectRatio="xMidYMax slice">
+    <svg viewBox="0 0 480 400" preserveAspectRatio="xMidYMid slice">
       <defs>
         <linearGradient id="dawn" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0"   stop-color="#FBE7E9"/>
@@ -35,7 +35,6 @@
       <rect width="480" height="400" fill="url(#dawn)"/>
       <circle cx="352" cy="96" r="30" fill="#D51A34" opacity=".14"/>
       <circle cx="352" cy="96" r="13" fill="#E8940C" opacity=".55"/>
-      <!-- Himalayan ridgeline: the horizon every Nepali player wakes up to -->
       <path d="M0 292 L58 214 L100 254 L164 166 L212 232 L262 150 L318 240 L370 194 L430 262 L480 224 L480 400 L0 400 Z"
             fill="#2C3A72" opacity=".13"/>
       <path d="M164 166 L182 190 L146 190 Z M262 150 L282 178 L242 178 Z" fill="#FFFDF6" opacity=".9"/>
@@ -46,34 +45,20 @@
 
   <div class="gate__body">
     <h1 class="wordmark">TUNA<em>NEPAL</em></h1>
-    <p>Post a room, take a challenge, get paid when you win.</p>
+    <p class="wordmark-sub">Post a room, take a challenge, get paid when you win.</p>
 
-    <div class="alert alert--bad" id="gateErr" hidden></div>
+    <div class="gate__card">
+      <h2 id="gateTitle">Sign in</h2>
+      <p class="gate__sub" id="gateSub">Your number and password.</p>
 
-    <form id="loginForm" novalidate>
-      <label class="field">
-        <span class="label">Mobile number</span>
-        <input id="inPhone" class="mono" type="tel" inputmode="numeric"
-               autocomplete="tel" placeholder="98XXXXXXXX" maxlength="14" required>
-      </label>
+      <div class="alert alert--bad" id="gateErr" hidden></div>
 
-      <label class="field">
-        <span class="label">Full name</span>
-        <input id="inName" type="text" autocomplete="name" placeholder="Your name" maxlength="40" required>
-      </label>
+      <form id="gateForm" novalidate>
+        <div id="gateBody"></div>
+      </form>
 
-      <label class="field" id="gatePassword" hidden>
-        <span class="label">Password</span>
-        <input id="inPassword" type="password" autocomplete="current-password" placeholder="Your password">
-        <span class="hint">You set this in Settings. Forgot it? Message support from any signed-in device.</span>
-      </label>
-
-      <button class="btn" type="submit" id="loginBtn">Enter</button>
-    </form>
-
-    <p class="xs muted" style="margin-top:12px">
-      Your number is your player ID. One number holds one account — the name locks to it after the first sign-in.
-    </p>
+      <div id="gateSwitch"></div>
+    </div>
   </div>
 </section>
 
@@ -126,29 +111,25 @@
     <!-- ───────────────────────────────────────────────────────── LOAD ── -->
     <section class="screen" id="screen-load">
       <div class="section-head"><h1>Load</h1></div>
-      <div class="empty"><div class="display">Coming in the next section</div>
-        <p>Deposit, withdraw, and the PUBG UC store.</p></div>
+      <div id="loadBody"></div>
     </section>
 
     <!-- ────────────────────────────────────────────────────── CUSTOMS ── -->
     <section class="screen" id="screen-customs">
       <div class="section-head"><h1>Customs</h1></div>
-      <div class="empty"><div class="display">Coming in the next section</div>
-        <p>Post a PUBG or Free Fire room with your own rules.</p></div>
+      <div id="customsBody"></div>
     </section>
 
     <!-- ──────────────────────────────────────────────────── MY GAMES ── -->
     <section class="screen" id="screen-games">
       <div class="section-head"><h1>My games</h1></div>
-      <div class="empty"><div class="display">Coming in the next section</div>
-        <p>Your matches, stakes, wins, and win claims.</p></div>
+      <div id="gamesBody"></div>
     </section>
 
     <!-- ───────────────────────────────────────────────────── SETTINGS ── -->
     <section class="screen" id="screen-settings">
       <div class="section-head"><h1>Settings</h1></div>
-      <div class="empty"><div class="display">Coming in the next section</div>
-        <p>Profile, leaderboard, history, theme, support, feedback.</p></div>
+      <div id="settingsBody"></div>
     </section>
   </main>
 

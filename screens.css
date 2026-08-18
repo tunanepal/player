@@ -267,3 +267,178 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
   cursor: pointer;
 }
 .tabs-inline button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+/* ────────────────────────────────────────── auth card on the sign-in gate ── */
+.wordmark-sub { color: var(--ink-3); margin: 6px 0 20px; max-width: 30ch; }
+
+.gate__card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 20px 18px 18px;
+  box-shadow: var(--shadow);
+}
+.gate__card h2 { font-size: var(--t-h2); }
+.gate__sub { color: var(--ink-3); font-size: var(--t-sm); margin: 2px 0 16px; }
+.gate__card .btn + .btn { margin-top: 8px; }
+#gateSwitch { margin-top: 14px; }
+#gateSwitch p { line-height: 1.9; }
+
+/* On a wide screen the gate art was scaling into giant triangles. Cap it to
+   the app column so the ridgeline keeps its proportions. */
+#gate .gate__art {
+  max-width: var(--shell);
+  left: 50%;
+  transform: translateX(-50%);
+  right: auto;
+  width: 100%;
+}
+
+/* ══════════════════════════════════════════ shared screen components ══════ */
+
+.two-up { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 380px) { .two-up { grid-template-columns: 1fr; gap: 0; } }
+
+.chiprow { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.chiprow button {
+  padding: 7px 13px;
+  border: 1px solid var(--line); border-radius: 20px;
+  background: var(--card); color: var(--ink-2);
+  font-family: var(--mono); font-size: 13.5px; cursor: pointer;
+  transition: all .13s var(--ease);
+}
+.chiprow button:hover { border-color: var(--ink-3); }
+.chiprow button[data-on] { background: var(--marigold); border-color: var(--marigold); color: #2A1B00; }
+
+/* balance headline on the Load screen */
+.balance-card {
+  background: linear-gradient(135deg, var(--crimson), #8E1026);
+  color: #fff;
+  border-radius: var(--r);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.balance-card small { font-size: var(--t-xs); letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+.balance-card b { display: block; font-size: 34px; font-weight: 600; margin-top: 2px; }
+
+/* file picker that looks like a real control, not a browser default */
+.filepick {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 84px; padding: 14px;
+  border: 1.5px dashed var(--line); border-radius: var(--r-sm);
+  background: var(--card-sunk);
+  color: var(--ink-3); font-size: var(--t-sm); text-align: center;
+  cursor: pointer; transition: all .15s;
+}
+.filepick:hover { border-color: var(--indigo); color: var(--indigo); }
+.filepick input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.filepick[data-has] { border-style: solid; border-color: var(--win); background: var(--win-sk); color: var(--win); }
+.filepick--inline { min-height: 0; padding: 8px 14px; border-radius: 20px; font-weight: 600; }
+
+/* payment QR */
+.qrbox {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 12px; margin-bottom: 16px;
+  background: var(--card-sunk); border: 1px solid var(--line); border-radius: var(--r-sm);
+}
+.qrbox img {
+  width: 132px; height: 132px; object-fit: contain; flex-shrink: 0;
+  background: #fff; border-radius: var(--r-sm); padding: 5px;
+}
+.qrbox__meta { flex: 1; min-width: 0; }
+@media (max-width: 400px) { .qrbox { flex-direction: column; align-items: center; } }
+
+/* UC packs */
+.packgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pack {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 14px; text-align: left;
+  border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--card); cursor: pointer;
+  transition: all .14s var(--ease);
+}
+.pack:hover { border-color: var(--ink-3); }
+.pack[data-on] { border-color: var(--marigold); background: var(--marigold-sk); }
+.pack b { font-family: var(--display); font-size: 19px; color: var(--ink); }
+.pack small { color: var(--ink-3); font-size: var(--t-xs); }
+.pack__price { display: block; margin-top: 6px; font-weight: 600; color: var(--crimson); }
+
+/* three-up score strip, used on My games and Settings */
+.scoreline {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--line); border: 1px solid var(--line);
+  border-radius: var(--r); overflow: hidden; margin-bottom: 16px;
+}
+.scoreline > div { background: var(--card); padding: 12px 10px; text-align: center; }
+.scoreline b { display: block; font-size: 20px; font-weight: 600; color: var(--ink); }
+.scoreline small { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+
+/* profile block */
+.profile { text-align: center; padding: 22px 16px 18px; }
+.profile .avatar { margin: 0 auto 12px; }
+.profile h2 { font-size: var(--t-h2); }
+.profile__acts { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
+
+/* settings menu rows */
+.menurow {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 14px;
+  background: none; border: 0; border-bottom: 1px solid var(--line-soft);
+  color: var(--ink-3); text-align: left; cursor: pointer;
+  transition: background .13s;
+}
+.menurow:last-child { border-bottom: 0; }
+.menurow:hover { background: var(--card-sunk); }
+.menurow b { display: block; color: var(--ink); font-family: var(--display); font-size: 17px; font-weight: 600; }
+.menurow small { display: block; color: var(--ink-3); font-size: var(--t-sm); }
+
+/* leaderboard */
+.lbrow { display: flex; align-items: center; gap: 11px; padding: 10px 0; border-bottom: 1px solid var(--line-soft); }
+.lbrow:last-child { border-bottom: 0; }
+.lbrow b { display: block; color: var(--ink); font-weight: 600; }
+.lbrow small { display: block; color: var(--ink-3); font-size: var(--t-xs); }
+.lbrank {
+  min-width: 34px; font-family: var(--mono); font-size: var(--t-sm);
+  font-weight: 600; color: var(--ink-3);
+}
+.lbrank--top { color: var(--crimson); font-size: 16px; }
+
+/* theme chooser */
+.themepick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.themepick button {
+  padding: 14px; text-align: left; cursor: pointer;
+  border: 1.5px solid var(--line); border-radius: var(--r); background: var(--card);
+}
+.themepick button[aria-pressed="true"] { border-color: var(--crimson); }
+.themepick b { display: block; font-family: var(--display); font-size: 18px; color: var(--ink); margin-top: 8px; }
+.themepick small { color: var(--ink-3); font-size: var(--t-xs); }
+.swatch { display: block; width: 100%; height: 40px; border-radius: var(--r-sm); border: 1px solid var(--line); }
+.swatch--cream { background: linear-gradient(135deg, #F6F1E4 55%, #D51A34 55%); }
+.swatch--dark  { background: linear-gradient(135deg, #14161F 55%, #FF4257 55%); }
+
+/* support chat */
+.chatbox {
+  max-height: 260px; overflow-y: auto;
+  padding: 10px; border: 1px solid var(--line); border-radius: var(--r-sm);
+  background: var(--card-sunk);
+}
+.bubble {
+  max-width: 84%; margin-bottom: 9px; padding: 9px 12px;
+  border-radius: 14px; font-size: var(--t-sm);
+}
+.bubble p { margin: 0; }
+.bubble time { display: block; margin-top: 3px; font-size: 10px; opacity: .65; }
+.bubble img, .bubble video { width: 100%; border-radius: 9px; margin-top: 6px; display: block; }
+.bubble--player { margin-left: auto; background: var(--crimson); color: #fff; border-bottom-right-radius: 4px; }
+.bubble--admin  { margin-right: auto; background: var(--card); color: var(--ink-2); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+
+/* star rating */
+.stars { display: flex; gap: 6px; justify-content: center; }
+.stars button {
+  background: none; border: 0; cursor: pointer;
+  font-size: 38px; line-height: 1; color: var(--line);
+  transition: color .12s, transform .12s;
+}
+.stars button:hover { transform: scale(1.12); }
+.stars button[data-on] { color: var(--marigold); }

@@ -2,18 +2,23 @@
 
 import { $, $$, applyTheme, savedTheme, toast, openSheet, closeSheet, esc, ago, emptyState } from './ui.js';
 import { rpcAuth } from './api.js';
-import { initGate, resume, refreshMe, state, paintChrome } from './session.js';
+import { resume, refreshMe, state, paintChrome } from './session.js';
+import { initAuth } from './auth.js';
 import { initHome, showHome, leaveHome, paintAds } from './home.js';
+import { showLoad } from './load.js';
+import { showCustoms, leaveCustoms } from './customs.js';
+import { showGames } from './games.js';
+import { showSettings } from './settings.js';
 
 applyTheme(savedTheme());
 
 /* ───────────────────────────────────────────────────────────── routing ── */
 const SCREENS = {
-  home:     { enter: showHome,  leave: leaveHome },
-  load:     {},
-  customs:  {},
-  games:    {},
-  settings: {}
+  home:     { enter: showHome,    leave: leaveHome },
+  load:     { enter: showLoad },
+  customs:  { enter: showCustoms, leave: leaveCustoms },
+  games:    { enter: showGames },
+  settings: { enter: showSettings }
 };
 
 let current = null;
@@ -73,7 +78,7 @@ async function enterApp() {
 }
 
 (async function start() {
-  initGate({ onSignedIn: enterApp });
+  initAuth({ onSignedIn: enterApp });
 
   if (await resume()) {
     paintAds(state.ads);
