@@ -710,3 +710,34 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
   box-shadow: 0 3px 14px rgba(28, 24, 19, .16);
 }
 [data-theme="dark"] .brandlogo { box-shadow: 0 3px 16px rgba(0, 0, 0, .5); }
+
+/* ═════════════════════════════════════════ important deposit notice ═════ */
+.notice-red {
+  display: flex; gap: 11px; align-items: flex-start;
+  padding: 13px 14px;
+  margin-bottom: 14px;
+  border: 2px solid var(--crimson);
+  border-radius: var(--r);
+  background: var(--crimson-sk);
+}
+.notice-red__mark {
+  flex-shrink: 0;
+  font-size: 19px; line-height: 1.2;
+  color: var(--crimson);
+}
+.notice-red b {
+  display: block;
+  font-family: var(--display);
+  font-size: 17px; font-weight: 600;
+  letter-spacing: .04em; text-transform: uppercase;
+  color: var(--crimson-dk);
+  margin-bottom: 2px;
+}
+.notice-red p {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--crimson-dk);
+}
+[data-theme="dark"] .notice-red b,
+[data-theme="dark"] .notice-red p { color: var(--crimson); }

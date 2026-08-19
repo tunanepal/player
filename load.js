@@ -51,6 +51,15 @@ function render() {
 /* ═══════════════════════════════════════════════════════════════ DEPOSIT ══ */
 function paneDeposit() {
   $('#loadPane').innerHTML = `
+    <div class="notice-red">
+      <span class="notice-red__mark">⚠</span>
+      <div>
+        <b>Please note ➤</b>
+        <p>Aafno wallet bata matrai pay garnu hola ra Rs 100 vanda tala ko
+           payment accepted hune chaina.</p>
+      </div>
+    </div>
+
     <div class="card">
       <div class="alert alert--bad" id="dErr" hidden></div>
 
