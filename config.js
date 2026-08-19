@@ -8,6 +8,11 @@ export const SUPABASE_KEY = 'sb_publishable_WVMexNwIj4J3bNZwbrEZPg_HBqmX013';
 export const BUCKET_PUBLIC = 'tuna-public';   // avatars, QR codes, banners
 export const BUCKET_PROOF  = 'tuna-proof';    // payment + win screenshots
 
+/* Direct download for the Android app file. Leave blank and the install
+   sheet simply offers the browser route instead. Example once hosted:
+   'https://tunanepal.com/tunanepal.apk'                                   */
+export const APK_URL = '';
+
 export const TOKEN_KEY = 'tuna.session';
 export const THEME_KEY = 'tuna.theme';
 

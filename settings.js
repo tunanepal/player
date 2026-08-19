@@ -8,6 +8,7 @@ import {
   emptyState, skeletons, openSheet, closeSheet, applyTheme
 } from './ui.js';
 import { state, refreshMe, signOut } from './session.js';
+import { openInstall, installMenuNote, isInstalled } from './install.js';
 
 export async function showSettings() {
   const p = state.player;
@@ -43,6 +44,7 @@ export async function showSettings() {
       ${menuRow('password', 'Change password', 'Update your sign-in password')}
       ${menuRow('report', 'Report a problem', 'Chat with support, send proof')}
       ${menuRow('feedback', 'Feedback', 'Rate the app')}
+      ${isInstalled() ? '' : menuRow('install', 'Get the app', installMenuNote())}
     </div>
 
     <button class="btn btn--ghost" id="logoutBtn" style="margin-top:16px">Sign out</button>
@@ -73,6 +75,7 @@ function open(key) {
   if (key === 'password') return password();
   if (key === 'report') return report();
   if (key === 'feedback') return feedback();
+  if (key === 'install') return openInstall();
 }
 
 /* ───────────────────────────────────────────────────────────── profile ── */

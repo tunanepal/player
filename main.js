@@ -9,6 +9,7 @@ import { showLoad } from './load.js';
 import { showCustoms, leaveCustoms } from './customs.js';
 import { showGames } from './games.js';
 import { showSettings } from './settings.js';
+import { paintInstall } from './install.js';
 
 applyTheme(savedTheme());
 
@@ -71,6 +72,7 @@ $('#bellBtn').addEventListener('click', async () => {
 async function enterApp() {
   await refreshMe();
   paintAds(state.ads);
+  paintInstall();
   $('#gate').hidden = true;
   $('#app').hidden = false;
   initHome();
@@ -82,6 +84,7 @@ async function enterApp() {
 
   if (await resume()) {
     paintAds(state.ads);
+    paintInstall();
     $('#gate').hidden = true;
     $('#app').hidden = false;
     initHome();

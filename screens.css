@@ -654,3 +654,59 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
 .tourn--tap:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 /* the call-to-action is a label now, not a button — keep it looking the same */
 .tourn--tap .btn { width: 100%; pointer-events: none; }
+
+/* ══════════════════════════════════════════════════════ install prompt ══ */
+.installcard {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 12px;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--crimson);
+  border-radius: var(--r);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+.installcard__icon img { border-radius: 10px; display: block; }
+.installcard b { display: block; font-family: var(--display); font-size: 17px; color: var(--ink); }
+.installcard small { display: block; font-size: var(--t-xs); color: var(--ink-3); }
+.installcard__x {
+  background: none; border: 0; cursor: pointer;
+  color: var(--ink-3); font-size: 22px; line-height: 1;
+  padding: 0 2px; align-self: flex-start;
+}
+.installcard__x:hover { color: var(--ink); }
+
+/* numbered steps in the iPhone sheet */
+.steplist { list-style: none; margin: 14px 0; padding: 0; }
+.steplist li {
+  display: flex; gap: 11px; align-items: flex-start;
+  padding: 9px 0; border-bottom: 1px solid var(--line-soft);
+  font-size: var(--t-sm); color: var(--ink-2);
+}
+.steplist li:last-child { border-bottom: 0; }
+.steplist span {
+  flex-shrink: 0; width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border-radius: 50%; background: var(--crimson); color: #fff;
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+}
+
+.installopt {
+  padding: 13px;
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--card-sunk);
+}
+.installopt b { display: block; font-family: var(--display); font-size: 17px; color: var(--ink); margin-bottom: 3px; }
+.installopt .btn { margin-top: 10px; text-decoration: none; }
+
+/* the mark itself, above the wordmark on the sign-in screen */
+.brandlogo {
+  display: block;
+  width: 76px; height: 76px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  box-shadow: 0 3px 14px rgba(28, 24, 19, .16);
+}
+[data-theme="dark"] .brandlogo { box-shadow: 0 3px 16px rgba(0, 0, 0, .5); }
