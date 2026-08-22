@@ -25,8 +25,6 @@ export const SCHEMA = {
         values: ['Warehouse', 'Ruins', 'Hangar', 'Erangel', 'Miramar', 'Sanhok', 'Livik'], def: 'Warehouse' },
       { key: 'gun_type', label: 'Gun type', type: 'choice',
         values: ['AR', 'SMG', 'SNIPER', 'SHOTGUN', 'PISTOL', 'All guns'], def: 'AR' },
-      { key: 'rounds', label: 'Rounds', type: 'choice',
-        values: ['3', '5', '7', '10'], def: '5' },
       { key: 'perspective', label: 'Perspective', type: 'choice',
         values: ['TPP', 'FPP'], def: 'TPP', opt: true },
       { key: 'scope', label: 'Scopes allowed', type: 'yn', def: true, opt: true },
