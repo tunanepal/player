@@ -101,7 +101,7 @@ function card(t) {
 
       <div class="slotbar"><i style="width:${pct}%"></i></div>
       <div class="tourn__meta">
-        <span class="mono">${t.taken}/${t.max_slots} slots</span>
+        <span class="mono">${t.taken}/${t.max_slots} ${t.players_per_team > 1 ? 'teams' : 'slots'}</span>
         ${t.my_slot ? `<span style="color:var(--win)">Your slot #${t.my_slot}</span>` : ''}
       </div>
 
@@ -141,6 +141,17 @@ async function sheet(id) {
     <p class="sheet__sub">${esc(GAMES[t.game].short)}${t.mode ? ' · ' + esc(t.mode) : ''}${t.map ? ' · ' + esc(t.map) : ''}</p>
     <div class="alert alert--bad" id="tErr" hidden></div>
 
+    ${t.my_roster && t.my_roster.length ? `
+      <p class="eyebrow" style="margin-bottom:8px">
+        ${t.my_team ? esc(t.my_team) : 'Your entry'}${t.my_slot ? ' · slot #' + t.my_slot : ''}</p>
+      <div class="card card--quiet" style="padding:0;margin-bottom:14px">
+        ${t.my_roster.map((m, i) => `
+          <div class="listrow" style="padding:9px 12px">
+            <span class="rosterrow__n">${i === 0 && t.my_roster.length > 1 ? 'C' : i + 1}</span>
+            <div class="grow"><b>${esc(m.name)}</b><small class="mono">${esc(m.uid)}</small></div>
+          </div>`).join('')}
+      </div>` : ''}
+
     ${t.my_status === 'confirmed' ? `<div class="alert alert--good">
       Your slot is confirmed. Room ID and password unlock here
       ${t.reveal_minutes} minutes before the match.</div>` : ''}
@@ -174,16 +185,37 @@ async function sheet(id) {
       <div class="rulebook"><p class="rule-text">${esc(t.rules)}</p></div>` : ''}
 
     ${!t.my_status && t.reg_open_now ? `
-      <label class="field" style="margin-top:14px">
-        <span class="label">Your in-game name</span>
-        <input id="trIgn" type="text" maxlength="30" placeholder="Exactly as it shows in game">
-      </label>
-      <label class="field">
-        <span class="label">Your in-game ID</span>
-        <input id="trUid" class="mono" type="text" inputmode="numeric" maxlength="15" placeholder="Numbers only">
-      </label>
+      <p class="eyebrow" style="margin:18px 0 8px">
+        ${t.players_per_team > 1 ? 'Your team' : 'Your details'}</p>
+
+      ${t.players_per_team > 1 ? `
+        <div class="alert alert--info">
+          One person registers the whole team and pays once. You get the room ID
+          — send it to your teammates yourself before the match.
+        </div>
+        <label class="field">
+          <span class="label">Team name</span>
+          <input id="trTeam" type="text" maxlength="30" placeholder="e.g. Himal Warriors">
+        </label>` : ''}
+
+      ${Array.from({ length: t.players_per_team }, (_, i) => `
+        <div class="rosterrow">
+          <span class="rosterrow__n">${i === 0 && t.players_per_team > 1 ? 'C' : i + 1}</span>
+          <div class="two-up grow">
+            <label class="field">
+              <span class="label">${i === 0 && t.players_per_team > 1
+                ? 'Captain in-game name' : 'In-game name'}</span>
+              <input class="tr-name" type="text" maxlength="30" placeholder="As it shows in game">
+            </label>
+            <label class="field">
+              <span class="label">In-game ID</span>
+              <input class="tr-uid mono" type="text" inputmode="numeric" maxlength="15" placeholder="Numbers only">
+            </label>
+          </div>
+        </div>`).join('')}
+
       <button class="btn" id="trGo">
-        ${t.entry_fee ? `Register · ${money(t.entry_fee)}` : 'Register free'}</button>
+        ${t.entry_fee ? `Register${t.players_per_team > 1 ? ' team' : ''} · ${money(t.entry_fee)}` : 'Register free'}</button>
       <button class="btn btn--ghost" id="trClose" style="margin-top:8px">Close</button>`
     : `<button class="btn btn--ghost" id="trClose" style="margin-top:16px">Close</button>`}
   `);
@@ -192,14 +224,23 @@ async function sheet(id) {
   $('#trGo')?.addEventListener('click', async (e) => {
     const err = $('#tErr');
     clearError(err);
-    const ign = $('#trIgn').value.trim();
-    const uid = $('#trUid').value.trim();
-    if (ign.length < 2) return showError(err, 'Enter your in-game name.');
-    if (!/^\d{5,15}$/.test(uid)) return showError(err, 'Enter your in-game ID — numbers only.');
+
+    const names = $$('.tr-name').map((i) => i.value.trim());
+    const uids  = $$('.tr-uid').map((i) => i.value.trim());
+    const team  = $('#trTeam')?.value.trim() || null;
+
+    for (let i = 0; i < names.length; i++) {
+      const who = t.players_per_team > 1 ? `player ${i + 1}` : 'you';
+      if (names[i].length < 2) return showError(err, `Enter the in-game name for ${who}.`);
+      if (!/^\d{5,15}$/.test(uids[i])) return showError(err, `In-game ID for ${who} must be 5 to 15 digits.`);
+    }
+    if (t.players_per_team > 1 && !team) return showError(err, 'Enter your team name.');
+
+    const roster = names.map((n, i) => ({ name: n, uid: uids[i] }));
 
     try {
       await busy(e.currentTarget, 'Registering…', () => rpcAuth('tuna_tournament_register', {
-        p_id: t.id, p_ingame_name: ign, p_ingame_uid: uid
+        p_id: t.id, p_roster: roster, p_team_name: team
       }));
       closeSheet();
       toast('Registered. An admin will confirm your slot.', 'good');
@@ -225,6 +266,7 @@ export function myTournamentCard(t) {
         <span class="pennant pennant--indigo">Tournament</span>
         <h3 style="margin-top:8px">${esc(t.title)}</h3>
         <small>${esc(GAMES[t.game].short)}${t.map ? ' · ' + esc(t.map) : ''} · ${esc(when(t.starts_at))}</small>
+        ${t.my_team ? `<small><b>${esc(t.my_team)}</b>${t.my_roster?.length ? ' · ' + t.my_roster.length + ' players' : ''}</small>` : ''}
       </div>
       ${regPill(t)}
     </div>

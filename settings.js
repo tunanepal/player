@@ -273,7 +273,12 @@ async function report() {
     try {
       const t = await rpcAuth('tuna_report_thread');
       const msgs = t.messages || [];
-      $('#chatBox').innerHTML = msgs.length ? msgs.map((m) => `
+      $('#chatBox').innerHTML = msgs.length ? msgs.map((m) => m.sender === 'system' ? `
+        <div class="sysmsg">
+          <span class="sysmsg__tick">✓</span>
+          <p>${esc(m.body)}</p>
+          <time>${esc(ago(m.created_at))}</time>
+        </div>` : `
         <div class="bubble bubble--${m.sender}">
           ${m.body ? `<p>${esc(m.body)}</p>` : ''}
           ${m.media_url ? (m.media_type === 'video'
@@ -309,6 +314,7 @@ async function report() {
       });
       $('#rBody').value = ''; $('#rFile').value = '';
       $('#rLabel').textContent = 'Attach photo or video (optional)';
+      $('#rPick').removeAttribute('data-has');
       await paint();
       toast('Sent. Support will reply here.', 'good');
     } catch (ex) { showError(err, ex.message); }

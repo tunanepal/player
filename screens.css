@@ -741,3 +741,40 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
 }
 [data-theme="dark"] .notice-red b,
 [data-theme="dark"] .notice-red p { color: var(--crimson); }
+
+/* ══════════════════════════════════════════════════ team roster rows ═══ */
+.rosterrow { display: flex; align-items: flex-start; gap: 10px; }
+.rosterrow__n {
+  flex-shrink: 0;
+  width: 24px; height: 24px; margin-top: 22px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--card-sunk); color: var(--ink-3);
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+}
+.rosterrow__n:only-child, .listrow .rosterrow__n { margin-top: 0; }
+/* the captain is marked, since only they hold the room ID */
+.rosterrow:first-of-type .rosterrow__n,
+.listrow .rosterrow__n:not(:empty) { background: var(--crimson-sk); color: var(--crimson-dk); }
+[data-theme="dark"] .rosterrow:first-of-type .rosterrow__n,
+[data-theme="dark"] .listrow .rosterrow__n { color: var(--crimson); }
+
+/* the app's own voice in a support chat — a notice, not a message */
+.sysmsg {
+  text-align: center;
+  margin: 12px auto;
+  padding: 14px 16px;
+  max-width: 90%;
+  border: 1px dashed var(--line);
+  border-radius: var(--r);
+  background: var(--card-sunk);
+}
+.sysmsg__tick {
+  display: grid; place-items: center;
+  width: 32px; height: 32px; margin: 0 auto 8px;
+  border-radius: 50%;
+  background: var(--win-sk); color: var(--win);
+  font-size: 16px; font-weight: 700;
+}
+.sysmsg p { font-size: var(--t-sm); color: var(--ink-2); line-height: 1.45; }
+.sysmsg time { display: block; margin-top: 5px; font-size: 10px; color: var(--ink-3); }
