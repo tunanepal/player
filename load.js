@@ -30,7 +30,7 @@ function render() {
     <div class="tabs-inline" id="loadTabs">
       <button data-t="deposit"  aria-pressed="${tab === 'deposit'}">Deposit</button>
       <button data-t="withdraw" aria-pressed="${tab === 'withdraw'}">Withdraw</button>
-      <button data-t="store"    aria-pressed="${tab === 'store'}">PUBG UC store</button>
+      <button data-t="store"    aria-pressed="${tab === 'store'}">Tuna store</button>
     </div>
 
     <div id="loadPane"></div>
@@ -395,7 +395,7 @@ async function loadHistory() {
 
   const title = tab === 'deposit' ? 'Your deposits'
               : tab === 'withdraw' ? 'Your withdrawals'
-              : 'Your UC orders';
+              : 'Your store orders';
 
   const slot = $('#loadHistory');
   if (!slot) return;

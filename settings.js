@@ -147,7 +147,7 @@ async function history() {
       <button data-h="ledger" aria-pressed="true">All</button>
       <button data-h="deposits" aria-pressed="false">Deposits</button>
       <button data-h="withdrawals" aria-pressed="false">Withdrawals</button>
-      <button data-h="purchases" aria-pressed="false">UC orders</button>
+      <button data-h="purchases" aria-pressed="false">Store</button>
       <button data-h="fines" aria-pressed="false">Fines</button>
     </div>
     <div id="hBody">${skeletons(4, 56)}</div>`);
