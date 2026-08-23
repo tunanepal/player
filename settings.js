@@ -122,8 +122,10 @@ async function leaderboard() {
             ${r.avatar_url ? `<img src="${esc(r.avatar_url)}" alt="">` : esc(initials(r.name))}
           </span>
           <span class="grow"><b>${esc(r.name)}</b>
-            <small>${r.wins} win${r.wins === 1 ? '' : 's'}</small></span>
-          <span class="amount amount--up">${money(r.earned)}</span>
+            <small>${r.played} game${r.played === 1 ? '' : 's'} played</small></span>
+          <span class="lbwins">
+            <b>${r.wins}</b><small>won</small>
+          </span>
         </div>`).join('')
         : emptyState('No winners yet', 'Play a match to get on the board.');
     } catch (e) { $('#lbBody').innerHTML = emptyState('Could not load', e.message); }

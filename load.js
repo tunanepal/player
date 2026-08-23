@@ -257,29 +257,53 @@ function paneWithdraw() {
 }
 
 /* ═════════════════════════════════════════════════════════════════ STORE ══ */
+/* No separate payment any more: the wallet pays for everything. Balance is
+   checked here for a clean message, and again in the database so two taps
+   cannot spend the same points twice. */
+let storeGame = 'pubg';
+
 async function paneStore() {
-  $('#loadPane').innerHTML = `<div id="packSlot">${skeletons(2, 70)}</div>`;
-  try { packs = await rpcAuth('tuna_uc_packs') || []; }
+  $('#loadPane').innerHTML = `
+    <div class="seg" id="segStoreGame" style="margin-bottom:14px">
+      <button type="button" data-g="pubg" aria-pressed="${storeGame === 'pubg'}">PUBG UC</button>
+      <button type="button" data-g="freefire" aria-pressed="${storeGame === 'freefire'}">FF Diamonds</button>
+    </div>
+    <div id="packSlot">${skeletons(2, 70)}</div>`;
+
+  $('#segStoreGame').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-g]');
+    if (!b || b.dataset.g === storeGame) return;
+    storeGame = b.dataset.g;
+    chosenPack = null;
+    paneStore();
+  });
+
+  let d;
+  try { d = await rpcAuth('tuna_store_packs', { p_game: storeGame }); }
   catch (e) {
     $('#packSlot').innerHTML = `<div class="alert alert--bad">${esc(e.message)}</div>`;
     return;
   }
 
+  packs = d.packs || [];
+  const unit = storeGame === 'freefire' ? 'diamonds' : 'UC';
+
   if (!packs.length) {
-    $('#packSlot').innerHTML = emptyState('Store is empty', 'UC packs will appear here soon.');
+    $('#packSlot').innerHTML = emptyState('Nothing on sale',
+      `${unit === 'UC' ? 'UC' : 'Diamond'} packs will appear here soon.`);
     return;
   }
 
   $('#packSlot').innerHTML = `
     <p class="small muted" style="margin-bottom:12px">
-      Pick a pack, pay by QR, then send us your PUBG ID. UC is delivered to
-      your account after the payment is confirmed.</p>
+      Paid straight from your points — no separate payment. 1 point = Rs 1.</p>
     <div class="packgrid">
       ${packs.map((p) => `
-        <button class="pack" data-p="${p.id}">
+        <button class="pack ${p.affordable ? '' : 'pack--short'}" data-p="${p.id}">
           <b>${esc(p.title)}</b>
-          <small>${p.uc_amount} UC</small>
-          <span class="pack__price mono">${money(p.price)}</span>
+          <small>${p.amount} ${unit}</small>
+          <span class="pack__price mono">${p.price} pts</span>
+          ${p.affordable ? '' : '<span class="pack__lock">Need more points</span>'}
         </button>`).join('')}
     </div>
     <div id="packForm"></div>`;
@@ -291,98 +315,69 @@ async function paneStore() {
   }));
 }
 
-async function packForm() {
+function packForm() {
   const p = chosenPack;
+  const unit = p.game === 'freefire' ? 'Diamonds' : 'UC';
+  const idLabel = p.game === 'freefire' ? 'Free Fire ID' : 'PUBG ID';
+  const balance = state.player?.points || 0;
+  const short = p.price - balance;
+
+  /* Not enough points: say so plainly and send them to the deposit tab
+     rather than letting them fill a form that cannot succeed. */
+  if (!p.affordable) {
+    $('#packForm').innerHTML = `
+      <div class="card" style="margin-top:14px">
+        <div class="alert alert--bad">
+          <b>Not enough points.</b><br>
+          ${esc(p.title)} costs ${p.price} points. You have ${balance}.
+          Add ${short} more to buy this.
+        </div>
+        <button class="btn btn--marigold" id="goDeposit">Add points</button>
+      </div>`;
+    $('#goDeposit').addEventListener('click', () => { tab = 'deposit'; showLoad(); });
+    return;
+  }
+
   $('#packForm').innerHTML = `
     <div class="card" style="margin-top:14px">
       <div class="alert alert--bad" id="sErr" hidden></div>
-      <div class="kv"><span>Pack</span><b>${esc(p.title)} · ${p.uc_amount} UC</b></div>
-      <div class="kv"><span>Price</span><b class="mono">${money(p.price)}</b></div>
+
+      <div class="kv"><span>Pack</span><b>${esc(p.title)} · ${p.amount} ${unit}</b></div>
+      <div class="kv"><span>Cost</span><b class="mono">${p.price} points</b></div>
+      <div class="kv"><span>Your balance</span><b class="mono">${balance} points</b></div>
+      <div class="kv" style="border:0"><span>Left after</span>
+        <b class="mono" style="color:var(--win)">${balance - p.price} points</b></div>
 
       <label class="field" style="margin-top:14px">
-        <span class="label">Pay with</span>
-        <div class="seg" id="segSMethod">
-          <button type="button" data-v="esewa" aria-pressed="true">eSewa</button>
-          <button type="button" data-v="khalti" aria-pressed="false">Khalti</button>
-        </div>
+        <span class="label">Your ${idLabel}</span>
+        <input id="sGameId" class="mono" type="text" inputmode="numeric" maxlength="15"
+               placeholder="Numbers only">
       </label>
-
-      <div id="sQrSlot">${skeletons(1, 180)}</div>
-
       <label class="field">
-        <span class="label">Your PUBG ID</span>
-        <input id="sPubg" class="mono" type="text" maxlength="20" placeholder="Numbers from your PUBG profile">
+        <span class="label">Your in-game name</span>
+        <input id="sGameName" type="text" maxlength="30" placeholder="Exactly as it shows in game">
       </label>
 
-      <div class="two-up">
-        <label class="field">
-          <span class="label">Wallet number you paid from</span>
-          <input id="sNumber" class="mono" type="text" maxlength="20" placeholder="98XXXXXXXX">
-        </label>
-        <label class="field">
-          <span class="label">Name on that wallet</span>
-          <input id="sName" type="text" maxlength="40" placeholder="Account holder name">
-        </label>
-      </div>
+      <p class="xs muted" style="margin-bottom:12px">
+        Check the ID carefully. ${unit} sent to a wrong ID cannot be recovered.</p>
 
-      <label class="field">
-        <span class="label">Payment screenshot</span>
-        <div class="filepick" id="sPick">
-          <input type="file" id="sFile" accept="image/jpeg,image/png,image/webp">
-          <span id="sFileLabel">Tap to choose the screenshot</span>
-        </div>
-      </label>
-
-      <button class="btn btn--marigold" id="sSubmit">Order ${p.uc_amount} UC</button>
+      <button class="btn btn--marigold" id="sSubmit">Buy for ${p.price} points</button>
     </div>`;
-
-  let sMethod = 'esewa';
-  const paintQr = async () => {
-    let q = null, qErr = null;
-    try { q = await rpcAuth('tuna_active_qr', { p_method: sMethod }); }
-    catch (e) { qErr = e.message; }
-    if (qErr) { $('#sQrSlot').innerHTML = `<div class="alert alert--bad">${esc(qErr)}</div>`; return; }
-    $('#sQrSlot').innerHTML = q
-      ? `<div class="qrbox"><img src="${esc(q.image_url)}" alt="QR" loading="lazy">
-           <div class="qrbox__meta">
-             ${q.wallet_name ? `<div class="kv"><span>Name</span><b>${esc(q.wallet_name)}</b></div>` : ''}
-             ${q.wallet_no ? `<div class="kv"><span>Number</span><b class="mono">${esc(q.wallet_no)}</b></div>` : ''}
-           </div></div>`
-      : `<div class="alert alert--info">No QR active for that wallet right now.</div>`;
-  };
-  await paintQr();
-
-  $('#segSMethod').addEventListener('click', (e) => {
-    const b = e.target.closest('button[data-v]');
-    if (!b) return;
-    sMethod = b.dataset.v;
-    [...$('#segSMethod').children].forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
-    paintQr();
-  });
-
-  filePicker('#sFile', '#sFileLabel');
 
   $('#sSubmit').addEventListener('click', async (e) => {
     const err = $('#sErr'); clearError(err);
-    const pubg = $('#sPubg').value.trim();
-    const number = $('#sNumber').value.trim();
-    const name = $('#sName').value.trim();
-    const file = $('#sFile').files[0];
+    const gid = $('#sGameId').value.trim();
+    const gname = $('#sGameName').value.trim();
 
-    if (!pubg) return showError(err, 'Enter your PUBG ID.');
-    if (!number) return showError(err, 'Enter the wallet number you paid from.');
-    if (!name) return showError(err, 'Enter the name on that wallet.');
-    if (!file) return showError(err, 'Attach the payment screenshot.');
+    if (!/^\d{5,15}$/.test(gid)) return showError(err, `Enter your ${idLabel} — numbers only.`);
+    if (gname.length < 2) return showError(err, 'Enter your in-game name.');
 
     try {
-      await busy(e.currentTarget, 'Sending…', async () => {
-        const url = await upload(BUCKET_PROOF, file);
-        await rpcAuth('tuna_buy_uc', {
-          p_pack: p.id, p_pubg_id: pubg,
-          p_wallet_no: number, p_wallet_name: name, p_screenshot: url
-        });
-      });
-      toast('Order placed. UC arrives once payment is confirmed.', 'good');
+      await busy(e.currentTarget, 'Buying…', () => rpcAuth('tuna_buy_pack', {
+        p_pack: p.id, p_game_id: gid, p_game_name: gname
+      }));
+      await refreshMe();
+      toast(`${p.price} points spent. Your ${unit.toLowerCase()} arrive shortly.`, 'good');
       chosenPack = null;
       showLoad();
     } catch (ex) { showError(err, ex.message); }
@@ -416,7 +411,7 @@ function historyRow(r) {
   const cls = status === 'approved' || status === 'delivered' ? 'pill--win'
             : status === 'pending' ? 'pill--wait' : 'pill--bad';
   const label = r.pack_title
-    ? `${esc(r.pack_title)} · ${r.uc_amount} UC`
+    ? `${esc(r.pack_title)} · ${r.points_spent ?? r.price} pts`
     : r.wallet_type
       ? `${money(r.amount)} to ${esc(r.wallet_type)}`
       : `${money(r.amount)} via ${esc(r.method || '')}`;

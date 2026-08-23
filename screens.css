@@ -778,3 +778,23 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
 }
 .sysmsg p { font-size: var(--t-sm); color: var(--ink-2); line-height: 1.45; }
 .sysmsg time { display: block; margin-top: 5px; font-size: 10px; color: var(--ink-3); }
+
+/* packs the player cannot yet afford stay visible but clearly out of reach */
+.pack--short { opacity: .55; }
+.pack--short .pack__price { color: var(--ink-3); }
+.pack__lock {
+  display: block; margin-top: 5px;
+  font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--crimson);
+}
+
+/* leaderboard now counts games, not rupees */
+.lbwins { text-align: right; }
+.lbwins b {
+  display: block; font-family: var(--mono); font-size: 17px;
+  font-weight: 600; color: var(--win);
+}
+.lbwins small {
+  font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3);
+}
