@@ -57,6 +57,8 @@ function paneDeposit() {
         <b>Please note ➤</b>
         <p>Aafno wallet bata matrai pay garnu hola ra Rs 100 vanda tala ko
            payment accepted hune chaina.</p>
+        <p class="notice-red__second">Remark ma aafno game name lekhnu hola,
+           natra load ma problem huna sakcha.</p>
       </div>
     </div>
 

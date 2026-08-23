@@ -798,3 +798,10 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
   font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
   color: var(--ink-3);
 }
+
+/* the second warning line, separated so both read as distinct rules */
+.notice-red__second {
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--crimson) 28%, transparent);
+}
