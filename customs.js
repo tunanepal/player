@@ -31,7 +31,6 @@ export const SCHEMA = {
       { key: 'grenades', label: 'Grenades', type: 'yn', def: false, opt: true },
       { key: 'healing', label: 'Healing items', type: 'yn', def: false, opt: true },
       { key: 'vehicles', label: 'Vehicles', type: 'yn', def: false, opt: true },
-      { key: 'level4_helmet', label: 'Level 4 helmet', type: 'yn', def: false, opt: true },
       { key: 'gun_chips', label: 'Gun chips', type: 'yn', def: false, opt: true },
       { key: 'loadout', label: 'Loadout compulsory', type: 'yn', def: true, opt: true },
       { key: 'spectators', label: 'Spectators allowed', type: 'yn', def: false, opt: true }
