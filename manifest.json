@@ -1,7 +1,7 @@
 {
-  "name": "Tunanepal — Play. Stake. Win.",
+  "name": "Tunanepal show your gaming skills, Join weekly tournament.",
   "short_name": "Tunanepal",
-  "description": "PUBG Mobile and Free Fire custom matches in Nepal.",
+  "description": "PUBG Mobile and Free Fire custom matches in Nepal. You can also create a new room and challenge another player to play with you.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
