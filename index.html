@@ -4,8 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tunanepal — Play. Stake. Win.</title>
-<meta name="description" content="PUBG Mobile and Free Fire custom matches in Nepal. Post a room, take a challenge, and get paid when you win.">
+<meta name="description" content="Tunanepal — PUBG Mobile and Free Fire custom rooms and tournaments in Nepal. Post a room, take a challenge, load with eSewa or Khalti, get paid when you win.">
 <meta name="theme-color" content="#F6F1E4">
+<link rel="canonical" href="https://tunanepal.com/">
+
+<meta property="og:title" content="Tunanepal — PUBG &amp; Free Fire matches in Nepal">
+<meta property="og:description" content="Post a custom room, take a challenge, join tournaments. Load with eSewa or Khalti and get paid when you win.">
+<meta property="og:image" content="https://tunanepal.com/icon-512.png">
+<meta property="og:url" content="https://tunanepal.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tunanepal">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
@@ -27,20 +36,25 @@
   <div class="gate__art" aria-hidden="true">
     <svg viewBox="0 0 480 400" preserveAspectRatio="xMidYMid slice">
       <defs>
-        <linearGradient id="dawn" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0"   stop-color="#FBE7E9"/>
-          <stop offset=".55" stop-color="#F6F1E4"/>
+        <linearGradient id="heat" x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0"   stop-color="#FBE4E7"/>
+          <stop offset=".55" stop-color="#F8EFE2"/>
           <stop offset="1"   stop-color="#F6F1E4"/>
         </linearGradient>
+        <radialGradient id="glowA" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#D51A34" stop-opacity=".26"/>
+          <stop offset="1" stop-color="#D51A34" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="glowB" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#E8940C" stop-opacity=".30"/>
+          <stop offset="1" stop-color="#E8940C" stop-opacity="0"/>
+        </radialGradient>
       </defs>
-      <rect width="480" height="400" fill="url(#dawn)"/>
-      <circle cx="352" cy="96" r="30" fill="#D51A34" opacity=".14"/>
-      <circle cx="352" cy="96" r="13" fill="#E8940C" opacity=".55"/>
-      <path d="M0 292 L58 214 L100 254 L164 166 L212 232 L262 150 L318 240 L370 194 L430 262 L480 224 L480 400 L0 400 Z"
-            fill="#2C3A72" opacity=".13"/>
-      <path d="M164 166 L182 190 L146 190 Z M262 150 L282 178 L242 178 Z" fill="#FFFDF6" opacity=".9"/>
-      <path d="M0 332 L74 280 L146 326 L226 266 L302 322 L386 274 L480 326 L480 400 L0 400 Z"
-            fill="#D51A34" opacity=".10"/>
+      <rect width="480" height="400" fill="url(#heat)"/>
+      <circle cx="366" cy="86"  r="150" fill="url(#glowA)"/>
+      <circle cx="104" cy="150" r="120" fill="url(#glowB)"/>
+      <!-- a single corner wedge for depth; nothing that reads as a horizon -->
+      <path d="M480 0 L480 118 L398 0 Z" fill="#1C1813" opacity=".06"/>
     </svg>
   </div>
 
@@ -48,6 +62,8 @@
     <img class="brandlogo" src="./logo.png" alt="" width="76" height="76">
     <h1 class="wordmark">TUNA<em>NEPAL</em></h1>
     <p class="wordmark-sub">Post a room, take a challenge, get paid when you win.</p>
+
+    <p class="battlecry">Are you ready for battle?</p>
 
     <div class="gate__card">
       <h2 id="gateTitle">Sign in</h2>

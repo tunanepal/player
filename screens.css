@@ -805,3 +805,60 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
   padding-top: 7px;
   border-top: 1px solid color-mix(in srgb, var(--crimson) 28%, transparent);
 }
+
+/* ═══════════════════════════════════════════════════════ the battle line ══
+   Crimson bleeding into black, cut on the same diagonal as the pennant that
+   runs through the rest of the app.                                       */
+.battlecry {
+  font-family: var(--display);
+  font-size: clamp(26px, 8.2vw, 36px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  margin: -12px 0 22px;
+
+  background-image: linear-gradient(102deg,
+    #12100E 0%,
+    #4A0C18 26%,
+    #B4142C 52%,
+    #FF2D45 72%,
+    #12100E 100%);
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+
+  /* the gradient drifts, so the words catch light rather than sitting flat */
+  animation: emberDrift 7s ease-in-out infinite alternate;
+}
+
+@keyframes emberDrift {
+  from { background-position:   0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+/* a thin ember underline, brightest where the text is hottest */
+.battlecry::after {
+  content: '';
+  display: block;
+  width: 84px;
+  height: 3px;
+  margin-top: 9px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #FF2D45, #B4142C 55%, transparent);
+}
+
+[data-theme="dark"] .battlecry {
+  background-image: linear-gradient(102deg,
+    #6B6560 0%,
+    #A81026 24%,
+    #FF3B52 50%,
+    #FF7A88 70%,
+    #6B6560 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battlecry { animation: none; background-position: 40% 50%; }
+}
