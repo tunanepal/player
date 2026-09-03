@@ -11,7 +11,7 @@
    Supabase calls are never touched — stale points would be worse than an
    honest error.                                                            */
 
-const CACHE = 'tuna-v26';
+const CACHE = 'tuna-v28';
 
 const SHELL = [
   './', './index.html', './manifest.json',

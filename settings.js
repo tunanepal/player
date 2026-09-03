@@ -39,6 +39,7 @@ export async function showSettings() {
 
     <div class="section-head"><h2>Menu</h2></div>
     <div class="card card--flush">
+      ${menuRow('rank', 'My rank', 'Your tier, progress and rewards')}
       ${menuRow('leaderboard', 'Leaderboard', 'Daily, weekly and monthly ranks')}
       ${menuRow('history', 'History', 'Deposits, withdrawals and every transaction')}
       ${menuRow('theme', 'Theme', 'Cream or dark')}
@@ -70,6 +71,7 @@ const menuRow = (key, title, note) => `
   </button>`;
 
 function open(key) {
+  if (key === 'rank') return myRank();
   if (key === 'leaderboard') return leaderboard();
   if (key === 'history') return history();
   if (key === 'theme') return theme();
@@ -99,6 +101,74 @@ async function clearAvatar() {
     toast('Photo removed.');
     showSettings();
   } catch (e) { toast(e.message, 'bad'); }
+}
+
+/* ──────────────────────────────────────────────────────────── my rank ── */
+async function myRank() {
+  openSheet(`<h2>My rank</h2>
+    <p class="sheet__sub">Climb by winning matches. Each tier pays once.</p>
+    <div id="rkBody">${skeletons(2, 90)}</div>`);
+
+  const paint = async () => {
+    let d;
+    try { d = await rpcAuth('tuna_my_rank'); }
+    catch (e) { $('#rkBody').innerHTML = emptyState('Could not load', e.message); return; }
+
+    const cur = d.current;
+    const next = d.next;
+
+    $('#rkBody').innerHTML = `
+      <div class="rankhero rank--${esc(cur.key)}">
+        <span class="rankhero__badge">${esc(cur.label)}</span>
+        <b>${d.wins} win${d.wins === 1 ? '' : 's'}</b>
+        <small>${d.losses} lost · ${money(d.total_claimed)} collected so far</small>
+
+        ${next ? `
+          <div class="rankbar"><i style="width:${Math.max(3, d.band_progress)}%"></i></div>
+          <p class="rankhero__next">
+            ${next.wins_needed} more win${next.wins_needed === 1 ? '' : 's'}
+            to reach <b>${esc(next.label)}</b>${next.reward > 0 ? ' · ' + money(next.reward) : ''}
+          </p>`
+        : `<p class="rankhero__next">Top tier reached. Nothing above this one.</p>`}
+      </div>
+
+      <p class="eyebrow" style="margin:18px 0 8px">All tiers</p>
+      ${d.tiers.map((t) => `
+        <div class="ranktier ${t.is_current ? 'ranktier--now' : ''} ${t.reached ? '' : 'ranktier--locked'}">
+          <span class="ranktier__dot rank--${esc(t.key)}"></span>
+          <div class="grow">
+            <b>${esc(t.label)}</b>
+            <small>${t.max_wins === null
+              ? `${t.min_wins}+ wins`
+              : `${t.min_wins}–${t.max_wins} wins`}</small>
+          </div>
+          <span class="ranktier__reward">${t.reward > 0 ? money(t.reward) : '—'}</span>
+          ${t.claimed
+            ? '<span class="pill pill--win">Collected</span>'
+            : t.claimable
+              ? `<button class="btn btn--sm btn--marigold" data-claim="${esc(t.key)}">Collect</button>`
+              : '<span class="pill">Locked</span>'}
+        </div>`).join('')}
+
+      <p class="xs muted" style="margin-top:14px">
+        Rewards are paid into your points balance and can be collected once
+        each. A tier you have already passed can still be collected.</p>
+
+      <button class="btn btn--ghost" id="rkDone" style="margin-top:14px">Close</button>`;
+
+    $('#rkDone').addEventListener('click', closeSheet);
+    $$('[data-claim]').forEach((b) => b.addEventListener('click', async (e) => {
+      try {
+        const out = await busy(e.currentTarget, 'Collecting…', () =>
+          rpcAuth('tuna_claim_rank', { p_rank: b.dataset.claim }));
+        toast(`${out.label} reward collected — ${money(out.reward)} added.`, 'good');
+        await refreshMe();
+        paint();
+      } catch (ex) { toast(ex.message, 'bad'); }
+    }));
+  };
+
+  await paint();
 }
 
 /* ───────────────────────────────────────────────────────── leaderboard ── */
