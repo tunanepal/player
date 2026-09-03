@@ -94,7 +94,33 @@ async function enterApp() {
   }
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js').then((reg) => {
+      // check for a newer build whenever the app is brought forward
+      const check = () => reg.update().catch(() => {});
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') check();
+      });
+
+      reg.addEventListener('updatefound', () => {
+        const fresh = reg.installing;
+        if (!fresh) return;
+        fresh.addEventListener('statechange', () => {
+          // a new version is ready and an old one is still in charge
+          if (fresh.state === 'installed' && navigator.serviceWorker.controller) {
+            fresh.postMessage({ type: 'tuna-skip-waiting' });
+          }
+        });
+      });
+    }).catch(() => {});
+
+    /* When the new worker takes control, reload once so the running app is
+       the version the player just downloaded. */
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloaded) return;
+      reloaded = true;
+      location.reload();
+    });
   }
 })();
 
