@@ -11,14 +11,14 @@
    Supabase calls are never touched — stale points would be worse than an
    honest error.                                                            */
 
-const CACHE = 'tuna-v28';
+const CACHE = 'tuna-v29';
 
 const SHELL = [
   './', './index.html', './manifest.json',
   './tokens.css', './base.css', './screens.css',
   './config.js', './api.js', './ui.js', './session.js', './auth.js',
   './home.js', './load.js', './customs.js', './games.js', './tourney.js',
-  './settings.js', './chat.js', './install.js', './main.js',
+  './settings.js', './chat.js', './ranks.js', './install.js', './main.js',
   './icon-192.png', './logo.png', './favicon.ico'
 ];
 

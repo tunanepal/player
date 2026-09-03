@@ -9,6 +9,7 @@ import {
 } from './ui.js';
 import { state, refreshMe, signOut } from './session.js';
 import { openSupportChat } from './chat.js';
+import { rankBadge, rankChip } from './ranks.js';
 import { openInstall, installMenuNote, isInstalled } from './install.js';
 
 export async function showSettings() {
@@ -19,7 +20,8 @@ export async function showSettings() {
         ${p.avatar_url ? `<img src="${esc(p.avatar_url)}" alt="">` : esc(initials(p.name))}
       </div>
       <h2>${esc(p.name)}</h2>
-      <p class="mono muted">${esc(p.phone)}</p>
+      ${p.rank ? rankChip(p.rank, p.rank_label) : ''}
+      <p class="mono muted" style="margin-top:6px">${esc(p.phone)}</p>
       <p class="xs muted" style="margin-top:2px">Your number is your player ID</p>
 
       <div class="profile__acts">
@@ -119,6 +121,7 @@ async function myRank() {
 
     $('#rkBody').innerHTML = `
       <div class="rankhero rank--${esc(cur.key)}">
+        <div class="rankhero__mark">${rankBadge(cur.key, 46)}</div>
         <span class="rankhero__badge">${esc(cur.label)}</span>
         <b>${d.wins} win${d.wins === 1 ? '' : 's'}</b>
         <small>${d.losses} lost · ${money(d.total_claimed)} collected so far</small>
@@ -135,7 +138,7 @@ async function myRank() {
       <p class="eyebrow" style="margin:18px 0 8px">All tiers</p>
       ${d.tiers.map((t) => `
         <div class="ranktier ${t.is_current ? 'ranktier--now' : ''} ${t.reached ? '' : 'ranktier--locked'}">
-          <span class="ranktier__dot rank--${esc(t.key)}"></span>
+          <span class="ranktier__mark">${rankBadge(t.key, 26)}</span>
           <div class="grow">
             <b>${esc(t.label)}</b>
             <small>${t.max_wins === null
@@ -192,8 +195,10 @@ async function leaderboard() {
           <span class="avatar avatar--sm">
             ${r.avatar_url ? `<img src="${esc(r.avatar_url)}" alt="">` : esc(initials(r.name))}
           </span>
-          <span class="grow"><b>${esc(r.name)}</b>
-            <small>${r.played} game${r.played === 1 ? '' : 's'} played</small></span>
+          <span class="grow">
+            <b>${esc(r.name)} ${r.rank ? rankBadge(r.rank, 15) : ''}</b>
+            <small>${esc(r.rank_label || '')}${r.rank_label ? ' · ' : ''}${r.played} game${r.played === 1 ? '' : 's'} played</small>
+          </span>
           <span class="lbwins">
             <b>${r.wins}</b><small>won</small>
           </span>

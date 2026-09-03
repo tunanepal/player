@@ -7,6 +7,7 @@ import { rpcAuth } from './api.js';
 import { GAMES } from './config.js';
 import { SCHEMA } from './customs.js';
 import { paintTournaments } from './tourney.js';
+import { rankBadge } from './ranks.js';
 import {
   $, $$, esc, money, when, mmss, onTick, toast, openSheet, closeSheet,
   busy, showError, clearError, emptyState, skeletons, avatarHTML
@@ -226,7 +227,7 @@ function roomCard(r) {
       ${avatarHTML({ name: r.host_name, avatar_url: r.host_avatar }, 'avatar--sm')}
       <div class="room__title">
         <h3>${esc((r.team_size || '').toUpperCase())} · ${esc(r.match_type || GAMES[r.game].short)}</h3>
-        <small>Hosted by ${esc(r.host_name)}${r.is_host ? ' · you' : ''}</small>
+        <small>Hosted by ${esc(r.host_name)}${r.host_rank ? ' ' + rankBadge(r.host_rank, 14) : ''}${r.is_host ? ' · you' : ''}</small>
       </div>
       <div class="room__stake">
         <b>${money(r.amount)}</b>
