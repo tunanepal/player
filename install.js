@@ -40,7 +40,8 @@ export function isInstalled() {
       || window.navigator.standalone === true;
 }
 
-const dismissed = () => localStorage.getItem(DISMISS_KEY) === '1';
+const dismissed = () => localStorage.getItem(DISMISS_KEY) === '1'
+                     || sessionStorage.getItem(DISMISS_KEY) === '1';
 
 /* ────────────────────────────────────────────────── the card on Home ──── */
 export function paintInstall() {
@@ -57,17 +58,20 @@ export function paintInstall() {
         <img src="./icon-192.png" alt="" width="46" height="46">
       </div>
       <div class="grow">
-        <b>Get the Tunanepal app</b>
+        <b>${p === 'ios' ? 'Add to Home Screen' : 'Get the Tunanepal app'}</b>
         <small>${p === 'ios'
-          ? 'Add it to your home screen from Safari'
+          ? 'Opens full screen, like an App Store app'
           : 'Full screen, opens instantly, works offline'}</small>
       </div>
-      <button class="btn btn--sm" id="installGo">Install</button>
+      <button class="btn btn--sm" id="installGo">${p === 'ios' ? 'Add' : 'Install'}</button>
       <button class="installcard__x" id="installX" aria-label="Dismiss">&times;</button>
     </div>`;
 
   $('#installX').addEventListener('click', () => {
-    localStorage.setItem(DISMISS_KEY, '1');
+    /* Android can re-prompt through Chrome; iPhone cannot, so we only hide
+       the card for this session rather than for ever. */
+    if (p === 'ios') sessionStorage.setItem(DISMISS_KEY, '1');
+    else localStorage.setItem(DISMISS_KEY, '1');
     slot.hidden = true;
   });
   $('#installGo').addEventListener('click', openInstall);

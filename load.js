@@ -106,7 +106,7 @@ function paneDeposit() {
 
       <button class="btn btn--marigold" id="dSubmit">Submit deposit</button>
       <p class="xs muted center" style="margin-top:10px">
-        Will be added, usually within minutes.</p>
+        An admin checks it and your points appear, usually within minutes.</p>
     </div>`;
 
   $('#segMethod').addEventListener('click', (e) => {
@@ -175,7 +175,7 @@ async function submitDeposit(e) {
         p_sender_name: name, p_sender_phone: phone, p_screenshot: url
       });
     });
-    toast('Deposit submitted.', 'good');
+    toast('Deposit submitted. An admin will confirm it shortly.', 'good');
     showLoad();
   } catch (ex) { showError(err, ex.message); }
 }

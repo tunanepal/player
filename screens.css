@@ -862,3 +862,136 @@ main { flex: 1; padding: 0 var(--pad) 92px; }
 @media (prefers-reduced-motion: reduce) {
   .battlecry { animation: none; background-position: 40% 50%; }
 }
+
+/* ══════════════════════════════════════════════ support chat screen ══════
+   A messaging layer over the app: full height, its own header, composer
+   pinned to the bottom above the keyboard.                                */
+.chatscreen {
+  position: fixed; inset: 0; z-index: 95;
+  max-width: var(--shell); margin: 0 auto;
+  display: flex; flex-direction: column;
+  background: var(--paper);
+  animation: chatIn .22s var(--ease) both;
+}
+@keyframes chatIn { from { transform: translateX(14px); opacity: 0; } }
+body.chat-open { overflow: hidden; }
+
+.chatbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: max(12px, env(safe-area-inset-top)) 14px 11px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+.chatbar__back {
+  display: grid; place-items: center;
+  width: 34px; height: 34px; flex-shrink: 0;
+  border: 0; border-radius: 50%;
+  background: transparent; color: var(--ink);
+  cursor: pointer;
+}
+.chatbar__back:hover { background: var(--card-sunk); }
+.chatbar__who b {
+  display: block; font-family: var(--display); font-size: 18px; color: var(--ink);
+}
+.chatbar__who small { display: block; font-size: var(--t-xs); color: var(--ink-3); }
+
+.chatfeed {
+  flex: 1; overflow-y: auto;
+  padding: 14px var(--pad) 8px;
+  overscroll-behavior: contain;
+}
+.chatday {
+  text-align: center; margin: 2px 0 14px;
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.msg {
+  max-width: 78%; margin-bottom: 9px;
+  padding: 9px 12px;
+  border-radius: 15px;
+  font-size: var(--t-sm); line-height: 1.45;
+  word-break: break-word;
+}
+.msg p { margin: 0; white-space: pre-wrap; }
+.msg time { display: block; margin-top: 3px; font-size: 10px; opacity: .62; }
+.msg img, .msg video {
+  width: 100%; max-width: 240px; border-radius: 10px; display: block;
+  margin-bottom: 6px;
+}
+.msg--me {
+  margin-left: auto;
+  background: var(--crimson); color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.msg--them {
+  margin-right: auto;
+  background: var(--card); color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 4px;
+}
+.msg--sending { opacity: .6; }
+.msg--failed {
+  background: var(--card-sunk); color: var(--loss);
+  border: 1px dashed var(--crimson); cursor: pointer;
+}
+
+/* the app's own closing line, centred and quiet */
+.chatsys { text-align: center; margin: 14px 0; }
+.chatsys span {
+  display: inline-block; max-width: 88%;
+  padding: 9px 14px; border-radius: 12px;
+  background: var(--win-sk); color: var(--win);
+  font-size: var(--t-xs); line-height: 1.45;
+}
+
+.chatempty { text-align: center; padding: 40px 24px; }
+.chatempty b {
+  display: block; font-family: var(--display); font-size: 20px; color: var(--ink);
+  margin-bottom: 5px;
+}
+.chatempty p { font-size: var(--t-sm); color: var(--ink-3); max-width: 30ch; margin: 0 auto; }
+
+.chatinput {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 10px var(--pad) max(12px, env(safe-area-inset-bottom));
+  background: var(--card);
+  border-top: 1px solid var(--line);
+}
+.chatinput textarea {
+  flex: 1; resize: none; min-height: 40px; max-height: 120px;
+  padding: 10px 13px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-size: 16px; line-height: 1.35;
+}
+.chatinput__clip {
+  position: relative; overflow: hidden; flex-shrink: 0;
+  display: grid; place-items: center;
+  width: 40px; height: 40px; border-radius: 50%;
+  color: var(--ink-3); cursor: pointer;
+}
+.chatinput__clip:hover { background: var(--card-sunk); color: var(--ink); }
+.chatinput__clip input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.chatinput__send {
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  width: 40px; height: 40px;
+  border: 0; border-radius: 50%;
+  background: var(--crimson); color: #fff;
+  cursor: pointer;
+}
+.chatinput__send:disabled { opacity: .5; }
+
+.chatfile {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px var(--pad);
+  background: var(--card-sunk);
+  border-top: 1px solid var(--line);
+  font-size: var(--t-xs); color: var(--ink-2);
+}
+.chatfile button {
+  margin-left: auto; border: 0; background: none;
+  color: var(--ink-3); font-size: 18px; cursor: pointer;
+}

@@ -2,12 +2,13 @@
    Profile, leaderboard, history, theme, support chat, feedback, sign out. */
 
 import { rpcAuth, upload } from './api.js';
-import { BUCKET_PUBLIC, BUCKET_PROOF } from './config.js';
+import { BUCKET_PUBLIC } from './config.js';
 import {
   $, $$, esc, money, when, ago, initials, toast, busy, showError, clearError,
   emptyState, skeletons, openSheet, closeSheet, applyTheme
 } from './ui.js';
 import { state, refreshMe, signOut } from './session.js';
+import { openSupportChat } from './chat.js';
 import { openInstall, installMenuNote, isInstalled } from './install.js';
 
 export async function showSettings() {
@@ -73,7 +74,7 @@ function open(key) {
   if (key === 'history') return history();
   if (key === 'theme') return theme();
   if (key === 'password') return password();
-  if (key === 'report') return report();
+  if (key === 'report') return openSupportChat();
   if (key === 'feedback') return feedback();
   if (key === 'install') return openInstall();
 }
@@ -252,73 +253,6 @@ function password() {
         rpcAuth('tuna_set_password', { p_new: n1, p_current: $('#pwCur').value }));
       closeSheet();
       toast('Password changed.', 'good');
-    } catch (ex) { showError(err, ex.message); }
-  });
-}
-
-/* ────────────────────────────────────────────────── report a problem ── */
-async function report() {
-  openSheet(`<h2>Report a problem</h2>
-    <p class="sheet__sub">Send a message, photo or video. Support replies here.</p>
-    <div class="chatbox" id="chatBox">${skeletons(2, 48)}</div>
-    <div class="alert alert--bad" id="rErr" hidden></div>
-    <label class="field" style="margin-top:12px">
-      <textarea id="rBody" placeholder="Describe what happened. If someone cheated, attach proof."></textarea>
-    </label>
-    <div class="filepick" id="rPick">
-      <input type="file" id="rFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime">
-      <span id="rLabel">Attach photo or video (optional)</span>
-    </div>
-    <button class="btn" id="rSend" style="margin-top:12px">Send message</button>`);
-
-  const paint = async () => {
-    try {
-      const t = await rpcAuth('tuna_report_thread');
-      const msgs = t.messages || [];
-      $('#chatBox').innerHTML = msgs.length ? msgs.map((m) => m.sender === 'system' ? `
-        <div class="sysmsg">
-          <span class="sysmsg__tick">✓</span>
-          <p>${esc(m.body)}</p>
-          <time>${esc(ago(m.created_at))}</time>
-        </div>` : `
-        <div class="bubble bubble--${m.sender}">
-          ${m.body ? `<p>${esc(m.body)}</p>` : ''}
-          ${m.media_url ? (m.media_type === 'video'
-            ? `<video src="${esc(m.media_url)}" controls playsinline></video>`
-            : `<img src="${esc(m.media_url)}" alt="attachment" loading="lazy">`) : ''}
-          <time>${esc(ago(m.created_at))}</time>
-        </div>`).join('')
-        : `<p class="xs muted center" style="padding:16px">No messages yet. Say what went wrong.</p>`;
-      $('#chatBox').scrollTop = $('#chatBox').scrollHeight;
-    } catch (e) { $('#chatBox').innerHTML = emptyState('Could not load', e.message); }
-  };
-  await paint();
-
-  $('#rFile').addEventListener('change', () => {
-    const f = $('#rFile').files[0];
-    $('#rLabel').textContent = f ? `✓ ${f.name.slice(0, 26)}` : 'Attach photo or video (optional)';
-    $('#rPick').toggleAttribute('data-has', !!f);
-  });
-
-  $('#rSend').addEventListener('click', async (e) => {
-    const err = $('#rErr'); clearError(err);
-    const body = $('#rBody').value.trim();
-    const file = $('#rFile').files[0];
-    if (!body && !file) return showError(err, 'Write a message or attach a file.');
-    try {
-      await busy(e.currentTarget, 'Sending…', async () => {
-        let url = null, type = null;
-        if (file) {
-          url = await upload(BUCKET_PROOF, file);
-          type = file.type.startsWith('video') ? 'video' : 'image';
-        }
-        await rpcAuth('tuna_report_send', { p_body: body, p_media_url: url, p_media_type: type });
-      });
-      $('#rBody').value = ''; $('#rFile').value = '';
-      $('#rLabel').textContent = 'Attach photo or video (optional)';
-      $('#rPick').removeAttribute('data-has');
-      await paint();
-      toast('Sent. Support will reply here.', 'good');
     } catch (ex) { showError(err, ex.message); }
   });
 }
