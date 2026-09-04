@@ -1,0 +1,48 @@
+/* ── captcha (migration 25) ───────────────────────────────────────────────
+   Append to your existing stylesheet. Uses the same tokens as the rest of
+   the gate; swap the var() names if yours differ. */
+
+.capbox {
+  border: 1px solid var(--line, #2a2a2a);
+  border-radius: 10px;
+  padding: 12px;
+  gap: 8px;
+}
+
+.signgrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 6px 0 2px;
+}
+
+.signbtn {
+  appearance: none;
+  background: var(--bg2, #161616);
+  border: 2px solid var(--line, #2a2a2a);
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+  line-height: 0;
+  transition: border-color .12s ease, transform .12s ease;
+}
+
+.signbtn svg { width: 100%; height: auto; display: block; }
+
+.signbtn:hover  { border-color: var(--muted, #666); }
+.signbtn:active { transform: scale(.96); }
+
+.signbtn.is-picked {
+  border-color: var(--accent, #3d8bfd);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #3d8bfd) 30%, transparent);
+}
+
+.signbtn:focus-visible {
+  outline: 2px solid var(--accent, #3d8bfd);
+  outline-offset: 2px;
+}
+
+/* Four tiles get cramped under ~360px; two rows of two reads better. */
+@media (max-width: 380px) {
+  .signgrid { grid-template-columns: repeat(2, 1fr); }
+}
