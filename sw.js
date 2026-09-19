@@ -1,4 +1,4 @@
-/* Tunanepal service worker.
+/* Tunanepal service worker with Firebase Cloud Messaging.
 
    Strategy: network first, cache as the safety net.
 
@@ -9,7 +9,10 @@
    stale app no longer does.
 
    Supabase calls are never touched — stale points would be worse than an
-   honest error.                                                            */
+   honest error.
+   
+   Push notifications: Firebase Cloud Messaging handles push events. When a
+   message arrives, showNotification() displays it even if the app is closed.   */
 
 const CACHE = 'tuna-v29';
 
@@ -67,5 +70,59 @@ self.addEventListener('fetch', (e) => {
       .catch(() =>
         caches.match(req).then((hit) =>
           hit || (req.mode === 'navigate' ? caches.match('./index.html') : undefined)))
+  );
+});
+
+/* ───────────────────────────────────────────────────── Firebase messages ── */
+
+self.addEventListener('push', (e) => {
+  if (!e.data) return;
+
+  let payload;
+  try {
+    payload = e.data.json();
+  } catch {
+    payload = { notification: { title: 'Tunanepal', body: e.data.text() } };
+  }
+
+  const { notification, data } = payload;
+  if (!notification) return;
+
+  const opts = {
+    icon: './icon-192.png',
+    badge: './logo.png',
+    tag: data?.tag || 'tuna',        // one notification per tag, updates instead of stacking
+    requireInteraction: false,        // dismiss after a bit; set true for wagers
+    data: data || {}
+  };
+
+  e.waitUntil(
+    self.registration.showNotification(notification.title, {
+      ...opts,
+      body: notification.body
+    })
+  );
+});
+
+/* Click a notification: focus the window or open the app. */
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+
+  const url = e.notification.data?.url || './';
+
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window' })
+      .then((clients) => {
+        // if the app tab is already open, focus it
+        for (let client of clients) {
+          if (client.url === new URL(url, self.location).href && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // otherwise, open a new tab
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(url);
+        }
+      })
   );
 });
