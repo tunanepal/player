@@ -30,6 +30,15 @@
 <link rel="stylesheet" href="./tokens.css">
 <link rel="stylesheet" href="./base.css">
 <link rel="stylesheet" href="./screens.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging.js"></script>
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+  import { FIREBASE_CONFIG, FIREBASE_VAPID_KEY } from './config.js';
+  
+  initializeApp(FIREBASE_CONFIG);
+  window.FIREBASE_VAPID_KEY = FIREBASE_VAPID_KEY;
+</script>
 </head>
 <body>
 
