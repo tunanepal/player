@@ -26,3 +26,14 @@ export const GAMES = {
 
 export const TEAM_SIZES = ['1v1', '2v2', '4v4'];
 export const GUN_TYPES  = ['AR', 'SMG', 'SNIPER', 'SHOTGUN'];
+export const firebaseConfig = {
+  apiKey: "AIzaSyAgD7xfGBusphas4--vUlX5vGUDBKEyVAY",
+  authDomain: "tunanotification.firebaseapp.com",
+  databaseURL: "https://tunanotification-default-rtdb.firebaseio.com",
+  projectId: "tunanotification",
+  storageBucket: "tunanotification.firebasestorage.app",
+  messagingSenderId: "249613673263",
+  appId: "1:249613673263:web:e69524fec49bc7cfdb77da",
+  measurementId: "G-JXBNCHNH4X"
+};
+export const FIREBASE_VAPID_KEY = "BA1f2r7j0UdFjh0pqGHtLFU11chc6RyX-0KQNtngqUe1x1MK5kSGbeRYZhwDVBWM3VUWlr_Zt-0v2GsSkAxutN0";
