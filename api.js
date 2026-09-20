@@ -7,7 +7,7 @@ import { SUPABASE_URL, SUPABASE_KEY, TOKEN_KEY } from './config.js';
 
 const headers = () => ({
   'apikey': SUPABASE_KEY,
-  'Authorization': `Bearer ${getToken() || SUPABASE_KEY}`,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
   'Content-Type': 'application/json'
 });
 
