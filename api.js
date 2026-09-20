@@ -25,12 +25,19 @@ function readError(payload, status) {
 export async function rpc(fn, args = {}) {
   let res, body;
   try {
+    const h = headers();
+    const token = getToken();
+    if (token) {
+      h['Authorization'] = `Bearer ${token}`;
+    }
+
     res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
-      method: 'POST', headers: headers(), body: JSON.stringify(args)
+      method: 'POST', headers: h, body: JSON.stringify(args)
     });
   } catch {
     throw new Error('No connection. Check your internet.');
   }
+   
   try { body = await res.json(); } catch { body = null; }
   if (!res.ok) {
     const err = new Error(readError(body, res.status));
