@@ -1,80 +1,101 @@
 /* Tunanepal — Firebase Cloud Messaging setup.
-
-   Call initNotifications() on app startup to request permission and subscribe.
-   Notifications will show on the lock screen and home screen even when the
-   app is closed. */
+   Simpler, more robust version with detailed logging. */
 
 import { rpc } from './api.js';
 
 let fcmToken = null;
 
 export async function initNotifications() {
-  // Skip if the browser doesn't support notifications
-  if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-    console.log('Notifications not supported');
+  console.log('[FCM] Init started');
+  
+  // Check browser support
+  if (!('Notification' in window)) {
+    console.log('[FCM] Notifications not supported');
     return;
   }
 
-  // Skip if the user has already denied (or never will get asked again)
+  if (!('serviceWorker' in navigator)) {
+    console.log('[FCM] Service workers not supported');
+    return;
+  }
+
+  // Check Firebase
+  if (!window.firebase || !window.firebase.messaging) {
+    console.error('[FCM] Firebase not initialized. Check index.html');
+    return;
+  }
+
+  console.log('[FCM] Firebase ready');
+
+  // Check permission
   if (Notification.permission === 'denied') {
-    console.log('Notifications denied by user');
+    console.log('[FCM] Notifications denied by user');
     return;
   }
 
-  // If already granted, subscribe silently
   if (Notification.permission === 'granted') {
-    subscribeToNotifications();
+    console.log('[FCM] Already granted, subscribing...');
+    await subscribe();
     return;
   }
 
-  // Otherwise, ask for permission
+  // Ask for permission
+  console.log('[FCM] Requesting permission...');
   try {
     const result = await Notification.requestPermission();
+    console.log('[FCM] Permission result:', result);
     if (result === 'granted') {
-      subscribeToNotifications();
+      await subscribe();
     }
   } catch (e) {
-    console.error('Notification permission error:', e);
+    console.error('[FCM] Permission error:', e);
   }
 }
 
-async function subscribeToNotifications() {
-  if (!('serviceWorker' in navigator)) return;
+async function subscribe() {
+  console.log('[FCM] Subscribe started');
+  
+  if (!navigator.serviceWorker) {
+    console.error('[FCM] Service worker unavailable');
+    return;
+  }
 
   try {
-    // Get the service worker registration
     const reg = await navigator.serviceWorker.ready;
+    console.log('[FCM] Service worker ready:', reg);
 
-    // Firebase SDK must be imported in your HTML
-    // <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    // <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging.js"></script>
-    // And initialized with your Firebase config
+    const messaging = firebase.messaging();
+    console.log('[FCM] Messaging instance created');
 
-    if (!window.firebase || !window.firebase.messaging) {
-      console.warn('Firebase messaging not initialized. See comments in notifications.js');
+    if (!window.FIREBASE_VAPID_KEY) {
+      console.error('[FCM] VAPID key missing from window');
       return;
     }
 
-    const messaging = firebase.messaging();
+    console.log('[FCM] Getting token with VAPID key...');
+    fcmToken = await messaging.getToken({
+      serviceWorkerRegistration: reg,
+      vapidKey: window.FIREBASE_VAPID_KEY
+    });
 
-    // Get the FCM token
-    try {
-      fcmToken = await messaging.getToken({
-        serviceWorkerRegistration: reg,
-        vapidKey: window.FIREBASE_VAPID_KEY  // set this in your config.js
-      });
+    console.log('[FCM] Token received:', fcmToken);
 
-      if (fcmToken) {
-        console.log('FCM token:', fcmToken);
-        // Send the token to Supabase so the backend can send notifications
-        await rpc('tuna_fcm_subscribe', { p_token: fcmToken, p_device: 'web' });
-      }
-    } catch (e) {
-      console.error('Failed to get FCM token:', e);
+    if (!fcmToken) {
+      console.error('[FCM] No token returned');
+      return;
     }
 
-    // Handle token refresh (Firebase refreshes periodically)
+    // Send to Supabase
+    console.log('[FCM] Storing token in Supabase...');
+    const result = await rpc('tuna_fcm_subscribe', { 
+      p_token: fcmToken, 
+      p_device: 'web' 
+    });
+    console.log('[FCM] Supabase response:', result);
+
+    // Handle token refresh
     messaging.onTokenRefresh(async () => {
+      console.log('[FCM] Token refresh triggered');
       try {
         const newToken = await messaging.getToken({
           serviceWorkerRegistration: reg,
@@ -83,14 +104,17 @@ async function subscribeToNotifications() {
         if (newToken && newToken !== fcmToken) {
           fcmToken = newToken;
           await rpc('tuna_fcm_subscribe', { p_token: fcmToken, p_device: 'web' });
-          console.log('FCM token refreshed');
+          console.log('[FCM] Token refreshed');
         }
       } catch (e) {
-        console.error('Token refresh failed:', e);
+        console.error('[FCM] Token refresh failed:', e);
       }
     });
+
+    console.log('[FCM] Setup complete!');
+
   } catch (e) {
-    console.error('Notification setup failed:', e);
+    console.error('[FCM] Subscribe error:', e, e.code, e.message);
   }
 }
 
@@ -99,8 +123,9 @@ export async function unsubscribeFromNotifications() {
     try {
       await rpc('tuna_fcm_unsubscribe', { p_token: fcmToken });
       fcmToken = null;
+      console.log('[FCM] Unsubscribed');
     } catch (e) {
-      console.error('Unsubscribe failed:', e);
+      console.error('[FCM] Unsubscribe failed:', e);
     }
   }
 }

@@ -1,18 +1,7 @@
 /* Tunanepal service worker with Firebase Cloud Messaging.
 
    Strategy: network first, cache as the safety net.
-
-   The old build served from cache first, which made the installed app show
-   yesterday's version until it had been opened twice. Now the app asks the
-   network for its own files, uses whatever comes back, and only falls back
-   to the cached copy when there is no connection. Offline still works; a
-   stale app no longer does.
-
-   Supabase calls are never touched — stale points would be worse than an
-   honest error.
-   
-   Push notifications: Firebase Cloud Messaging handles push events. When a
-   message arrives, showNotification() displays it even if the app is closed.   */
+   Push notifications: Firebase Cloud Messaging handles push events. */
 
 const CACHE = 'tuna-v29';
 
@@ -22,19 +11,25 @@ const SHELL = [
   './config.js', './api.js', './ui.js', './session.js', './auth.js',
   './home.js', './load.js', './customs.js', './games.js', './tourney.js',
   './settings.js', './chat.js', './ranks.js', './install.js', './main.js',
+  './notifications.js',
   './icon-192.png', './logo.png', './favicon.ico'
 ];
 
 self.addEventListener('install', (e) => {
+  console.log('[SW] Installing');
   e.waitUntil(
     caches.open(CACHE)
       .then((c) => c.addAll(SHELL))
-      .then(() => self.skipWaiting())     // take over without waiting for tabs
-      .catch(() => self.skipWaiting())
+      .then(() => self.skipWaiting())
+      .catch((err) => {
+        console.error('[SW] Install error:', err);
+        self.skipWaiting();
+      })
   );
 });
 
 self.addEventListener('activate', (e) => {
+  console.log('[SW] Activating');
   e.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
@@ -55,8 +50,10 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
 
   if (req.method !== 'GET') return;
-  if (url.hostname.endsWith('supabase.co')) return;   // live data, always
-  if (url.origin !== location.origin) return;         // fonts and CDNs
+  if (url.hostname.endsWith('supabase.co')) return;
+  if (url.hostname.endsWith('googleapis.com')) return;
+  if (url.hostname.endsWith('gstatic.com')) return;
+  if (url.origin !== location.origin) return;
 
   e.respondWith(
     fetch(req)
@@ -76,23 +73,38 @@ self.addEventListener('fetch', (e) => {
 /* ───────────────────────────────────────────────────── Firebase messages ── */
 
 self.addEventListener('push', (e) => {
-  if (!e.data) return;
+  console.log('[SW] Push received:', e.data);
+  
+  if (!e.data) {
+    console.log('[SW] No data in push');
+    return;
+  }
 
   let payload;
   try {
     payload = e.data.json();
   } catch {
-    payload = { notification: { title: 'Tunanepal', body: e.data.text() } };
+    payload = { 
+      notification: { 
+        title: 'Tunanepal', 
+        body: e.data.text() 
+      } 
+    };
   }
 
+  console.log('[SW] Payload:', payload);
+
   const { notification, data } = payload;
-  if (!notification) return;
+  if (!notification) {
+    console.log('[SW] No notification in payload');
+    return;
+  }
 
   const opts = {
     icon: './icon-192.png',
     badge: './logo.png',
-    tag: data?.tag || 'tuna',        // one notification per tag, updates instead of stacking
-    requireInteraction: false,        // dismiss after a bit; set true for wagers
+    tag: data?.tag || 'tuna',
+    requireInteraction: false,
     data: data || {}
   };
 
@@ -100,12 +112,17 @@ self.addEventListener('push', (e) => {
     self.registration.showNotification(notification.title, {
       ...opts,
       body: notification.body
+    }).then(() => {
+      console.log('[SW] Notification shown');
+    }).catch((err) => {
+      console.error('[SW] Show notification error:', err);
     })
   );
 });
 
 /* Click a notification: focus the window or open the app. */
 self.addEventListener('notificationclick', (e) => {
+  console.log('[SW] Notification clicked');
   e.notification.close();
 
   const url = e.notification.data?.url || './';
@@ -113,13 +130,11 @@ self.addEventListener('notificationclick', (e) => {
   e.waitUntil(
     self.clients.matchAll({ type: 'window' })
       .then((clients) => {
-        // if the app tab is already open, focus it
         for (let client of clients) {
           if (client.url === new URL(url, self.location).href && 'focus' in client) {
             return client.focus();
           }
         }
-        // otherwise, open a new tab
         if (self.clients.openWindow) {
           return self.clients.openWindow(url);
         }
