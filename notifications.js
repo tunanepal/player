@@ -5,7 +5,7 @@ import { rpc } from './api.js';
 
 let fcmToken = null;
 
-export async function initNotifications() {
+export async function initNotifications(playerId) {
   console.log('[FCM] Init started');
   
   // Check browser support
