@@ -354,7 +354,7 @@ async function land(out) {
   captcha = null; capChoice = null;
   setToken(out.token);
   applyTheme(out.player.theme || savedTheme());
-   import('./notifications.js').then(n => n.initNotifications());
+   import('./notifications.js').then(n => n.initNotifications(out.player.id));
   toast(out.created
     ? `Welcome to Tunanepal, ${out.player.name.split(' ')[0]}.`
     : `Welcome back, ${out.player.name.split(' ')[0]}.`, 'good');
