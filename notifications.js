@@ -1,14 +1,17 @@
-/* Tunanepal — Firebase Cloud Messaging setup.
-   Simpler, more robust version with detailed logging. */
+/* Tunanepal — Firebase Cloud Messaging setup. */
 
 import { rpc } from './api.js';
 
 let fcmToken = null;
 
 export async function initNotifications(playerId) {
-  console.log('[FCM] Init started');
+  console.log('[FCM] Init started with playerId:', playerId);
   
-  // Check browser support
+  if (!playerId) {
+    console.error('[FCM] No player ID provided');
+    return;
+  }
+
   if (!('Notification' in window)) {
     console.log('[FCM] Notifications not supported');
     return;
@@ -19,7 +22,6 @@ export async function initNotifications(playerId) {
     return;
   }
 
-  // Check Firebase
   if (!window.firebase || !window.firebase.messaging) {
     console.error('[FCM] Firebase not initialized. Check index.html');
     return;
@@ -27,7 +29,6 @@ export async function initNotifications(playerId) {
 
   console.log('[FCM] Firebase ready');
 
-  // Check permission
   if (Notification.permission === 'denied') {
     console.log('[FCM] Notifications denied by user');
     return;
@@ -35,24 +36,23 @@ export async function initNotifications(playerId) {
 
   if (Notification.permission === 'granted') {
     console.log('[FCM] Already granted, subscribing...');
-    await subscribe();
+    await subscribe(playerId);
     return;
   }
 
-  // Ask for permission
   console.log('[FCM] Requesting permission...');
   try {
     const result = await Notification.requestPermission();
     console.log('[FCM] Permission result:', result);
     if (result === 'granted') {
-      await subscribe();
+      await subscribe(playerId);
     }
   } catch (e) {
     console.error('[FCM] Permission error:', e);
   }
 }
 
-async function subscribe() {
+async function subscribe(playerId) {
   console.log('[FCM] Subscribe started');
   
   if (!navigator.serviceWorker) {
@@ -62,17 +62,17 @@ async function subscribe() {
 
   try {
     const reg = await navigator.serviceWorker.ready;
-    console.log('[FCM] Service worker ready:', reg);
+    console.log('[FCM] Service worker ready');
 
     const messaging = firebase.messaging();
     console.log('[FCM] Messaging instance created');
 
     if (!window.FIREBASE_VAPID_KEY) {
-      console.error('[FCM] VAPID key missing from window');
+      console.error('[FCM] VAPID key missing');
       return;
     }
 
-    console.log('[FCM] Getting token with VAPID key...');
+    console.log('[FCM] Getting token...');
     fcmToken = await messaging.getToken({
       serviceWorkerRegistration: reg,
       vapidKey: window.FIREBASE_VAPID_KEY
@@ -85,13 +85,20 @@ async function subscribe() {
       return;
     }
 
-    // Send to Supabase
-    console.log('[FCM] Storing token in Supabase...');
+    // Send to Supabase with playerId
+    console.log('[FCM] Storing token in Supabase with playerId:', playerId);
     const result = await rpc('tuna_fcm_subscribe', { 
+      p_player_id: playerId,
       p_token: fcmToken, 
       p_device: 'web' 
     });
     console.log('[FCM] Supabase response:', result);
+
+    if (result && result.ok) {
+      console.log('[FCM] Setup complete!');
+    } else {
+      console.error('[FCM] Save failed:', result?.error);
+    }
 
     // Handle token refresh
     messaging.onTokenRefresh(async () => {
@@ -103,7 +110,11 @@ async function subscribe() {
         });
         if (newToken && newToken !== fcmToken) {
           fcmToken = newToken;
-          await rpc('tuna_fcm_subscribe', { p_token: fcmToken, p_device: 'web' });
+          await rpc('tuna_fcm_subscribe', { 
+            p_player_id: playerId,
+            p_token: fcmToken, 
+            p_device: 'web' 
+          });
           console.log('[FCM] Token refreshed');
         }
       } catch (e) {
@@ -111,10 +122,8 @@ async function subscribe() {
       }
     });
 
-    console.log('[FCM] Setup complete!');
-
   } catch (e) {
-    console.error('[FCM] Subscribe error:', e, e.code, e.message);
+    console.error('[FCM] Subscribe error:', e);
   }
 }
 
